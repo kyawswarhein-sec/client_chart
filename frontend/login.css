@@ -1,0 +1,104 @@
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 100%;
+    max-width: 400px;
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.login-header h2 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.8rem;
+}
+
+.login-header p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.login-body {
+    padding: 2rem;
+}
+
+.form-floating {
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.btn-login {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 1rem;
+}
+
+.input-group-text {
+    background: transparent;
+    border: 2px solid #e9ecef;
+    border-right: none;
+    color: #6c757d;
+}
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.input-group .form-control:focus + .input-group-text {
+    border-color: #007bff;
+} 

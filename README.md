@@ -83,28 +83,28 @@ A comprehensive web-based admin dashboard for client management with real-time d
 ## 📁 Project Structure
 
 client_chart/
-├── 📂 backend/ # PHP Backend API
-│ ├── 🔐 login.php # Authentication handler
-│ ├── 🚪 logout.php # Session termination
-│ ├── 📊 dashboard.php # Dashboard data controller
-│ ├── ✅ check_session.php # Session validation API
-│ ├── ➕ add_client.php # Add client API
-│ ├── 🗑️ delete_clients.php # Delete clients API
-│ ├── ❌ get_login_error.php # Login error handler
-│ └── 🗄️ db.php # Database connection
-├── 📂 frontend/ # Frontend Interface
-│ ├── 🏠 dashboard.html # Main dashboard layout
-│ ├── 🎨 dashboard.css # Dashboard styling
-│ ├── ⚡ dashboard.js # Dashboard interactions
-│ ├── 🔑 login.html # Login page layout
-│ ├── 🎨 login.css # Login page styling
-│ └── ⚡ login.js # Login page interactions
-├── 📂 assets/ # Static Assets
-│ ├── 📂 backup/ # Database backups
-│ │ └── 200_clients_data.sql
-│ └── 📂 pics/ # Images and icons
-├── 🏠 index.php # Application entry point
-└── 📖 README.md # Project documentation
+├── backend/              # PHP backend API endpoints
+│   ├── login.php         # Handles user authentication
+│   ├── logout.php        # Manages user logout and session termination
+│   ├── dashboard.php     # Provides dashboard data
+│   ├── check_session.php # Validates user session status
+│   ├── add_client.php    # API to add a new client
+│   ├── delete_clients.php# API to delete client records
+│   ├── get_login_error.php # Returns login error details
+│   └── db.php            # Database connection and configuration
+├── frontend/             # Frontend user interface files
+│   ├── dashboard.html    # Main dashboard layout
+│   ├── dashboard.css     # Dashboard page styling
+│   ├── dashboard.js      # Dashboard page interactivity
+│   ├── login.html        # Login form layout
+│   ├── login.css         # Login page styling
+│   └── login.js          # Login page interactivity
+├── assets/               # Static assets
+│   ├── backup/           # Database backup files
+│   │   └── 200_clients_data.sql
+│   └── pics/             # Images and icons
+├── index.php             # Application entry point
+└── README.md             # Project documentation
 
 
 ## 🗄️ Database Schema

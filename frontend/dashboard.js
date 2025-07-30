@@ -1063,8 +1063,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show success modal with refresh callback
         showSuccessModal(`Client "${clientData.name}" added successfully!`, function() {
-          // Refresh dashboard when user clicks "Got it"
-          refreshDashboard();
+          // Simple page reload to ensure everything refreshes properly
+          console.log('Add client success modal closed - reloading page for complete refresh...');
+          window.location.reload();
         });
       } else {
         showErrorModal('Add Client Failed', result.message);
@@ -1286,17 +1287,28 @@ document.addEventListener('DOMContentLoaded', function() {
         operationCompleted = true;
         console.log('Deletion successful!', result);
         
+        // Immediately clear selections and update UI
+        selectedClients = [];
+        const selectAllCheckbox = document.getElementById('selectAll');
+        if (selectAllCheckbox) {
+          selectAllCheckbox.checked = false;
+          selectAllCheckbox.indeterminate = false;
+        }
+        
+        // Clear individual client checkboxes
+        const clientCheckboxes = document.querySelectorAll('.client-checkbox');
+        clientCheckboxes.forEach(checkbox => {
+          checkbox.checked = false;
+        });
+        
+        // Update button visibility immediately
+        updateSelectedClients();
+        
         // Show success modal with refresh callback
         showSuccessModal(`${result.deletedCount} client(s) deleted successfully!`, function() {
-          // Refresh dashboard when user clicks "Got it"
-          console.log('Starting dashboard refresh after successful deletion...');
-          refreshDashboard().then(() => {
-            console.log('Dashboard refresh completed successfully');
-          }).catch(error => {
-            console.error('Dashboard refresh failed:', error);
-            // Fallback: reload the page if refresh fails
-            location.reload();
-          });
+          // Simple page reload to ensure everything refreshes properly
+          console.log('Success modal closed - reloading page for complete refresh...');
+          window.location.reload();
         });
         
       } else {

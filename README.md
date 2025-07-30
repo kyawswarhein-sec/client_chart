@@ -281,7 +281,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For support and questions:
 - **GitHub Issues:** [Create an issue](https://github.com/kyawswarhein-sec/client_chart/issues)
-- **Email:** your-email@example.com
+- **Email:** work.kyawswarhein.com
 
 ## 🙏 Acknowledgments
 
@@ -294,4 +294,4 @@ For support and questions:
 
 ⭐ **Star this repo if you find it helpful!** ⭐
 
-Built with ❤️ by [Your Name](https://github.com/kyawswarhein-sec)
+Built with ❤️ by [Kyaw Swar Hein](https://github.com/kyawswarhein-sec)

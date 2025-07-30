@@ -306,36 +306,34 @@ body {
 .sortable:hover .sort-icon {
   opacity: 1;
   transform: scale(1.1);
-  color: #ffffff;
+  color: #333333; /* Dark color for visibility */
 }
 
 .sortable.asc {
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.2), rgba(0, 86, 179, 0.25)) !important;
-  color: #ffffff !important;
+  /* Removed background highlight - keep natural table header styling */
 }
 
 .sortable.desc {
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.2), rgba(0, 86, 179, 0.25)) !important;
-  color: #ffffff !important;
+  /* Removed background highlight - keep natural table header styling */
 }
 
 .sortable.asc .sort-icon:before {
   content: "\f0de"; /* fa-sort-up */
   opacity: 1;
-  color: #ffffff;
+  color: #333333; /* Dark color for visibility */
 }
 
 .sortable.desc .sort-icon:before {
   content: "\f0dd"; /* fa-sort-down */
   opacity: 1;
-  color: #ffffff;
+  color: #333333; /* Dark color for visibility */
 }
 
 .sortable.asc .sort-icon,
 .sortable.desc .sort-icon {
   opacity: 1;
   transform: scale(1.15);
-  color: #ffffff;
+  color: #333333; /* Dark color for visibility */
 }
 
 /* Table body improvements */
@@ -1225,4 +1223,95 @@ textarea.form-control {
 @keyframes loadingSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* Filter Row Uniform Sizing - Force exact same appearance */
+.filter-row input[type="text"].form-control,
+.filter-row select.form-select,
+.filter-row button.btn {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  line-height: 1.2 !important;
+  padding: 5px 12px !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+  border-width: 1px !important;
+  margin: 0 !important;
+}
+
+/* Force search input to match dropdown exactly */
+.filter-row #searchClients.form-control {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  padding: 5px 12px !important;
+  border: 1px solid #ced4da !important;
+}
+
+/* Specific button styling */
+.filter-row button.btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+
+/* Fix delete button text size specifically */
+.filter-row #deleteSelectedBtn {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.filter-row #deleteSelectedBtn i {
+  font-size: 11px !important;
+  margin-right: 4px !important;
+}
+
+/* Ensure all icons are same size */
+.filter-row .btn i {
+  font-size: 12px !important;
+  margin-right: 4px !important;
+}
+
+/* Force Reset and Add Client buttons to be identical */
+.filter-row #resetFilters,
+.filter-row #addClientBtn,
+.filter-row #deleteSelectedBtn {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  padding: 5px 12px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  border-radius: 6px !important;
+  border-width: 1px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+
+/* Container alignment */
+.filter-row.row {
+  align-items: center !important;
+}
+
+.filter-row .col-md-2 {
+  display: flex !important;
+  align-items: center !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.filter-row .col-md-2 > * {
+  width: 100% !important;
+  flex: 1 !important;
 } 

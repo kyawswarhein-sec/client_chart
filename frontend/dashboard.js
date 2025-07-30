@@ -11,6 +11,15 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Set global data variables
       window.clientsData = data.clients;
+      
+      // Add frontend IDs - simple countdown system
+      // Backend orders by id DESC (newest first), so index 0 = newest client
+      window.clientsData.forEach((client, index) => {
+        // Frontend ID: newest client gets highest number (200), oldest gets lowest (1)
+        client.frontend_id = window.clientsData.length - index;
+        client.original_order = index; // Store original order for sorting
+      });
+      
       window.ageGroupsData = data.ageGroups;
       window.genderCountData = data.genderCount;
       window.locationCountData = data.locationCount;
@@ -19,6 +28,14 @@ document.addEventListener('DOMContentLoaded', function() {
       // Update UI elements
       document.getElementById('totalClients').textContent = data.totalClients;
       document.getElementById('profileName').textContent = data.admin;
+      
+      // Initialize filteredClients first
+      filteredClients = [...window.clientsData];
+      
+      // No default sort state - just show data as received (200, 199, 198...)
+      // Data comes sorted from backend, but don't mark any column as "sorted"
+
+      console.log('Initial client data loaded:', data.clients.length, 'clients');
       
       // Initialize the dashboard
       initializeDashboard();
@@ -89,8 +106,19 @@ document.addEventListener('DOMContentLoaded', function() {
     updatePagination();
   }
 
+  // Calculate display IDs for current view
+  function calculateDisplayIds() {
+    // Always use the frontend_id (which is already calculated as 200, 199, 198... or sorted)
+    filteredClients.forEach((client, index) => {
+      client.display_id = client.frontend_id;
+    });
+  }
+
   // Display clients based on pagination
   function displayClients() {
+    // Calculate display IDs for current filtered/sorted view
+    calculateDisplayIds();
+    
     const tableBody = document.getElementById('allClientsTableBody');
     const startIndex = (currentPage - 1) * clientsPerPage;
     let endIndex;
@@ -104,13 +132,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const clientsToShow = filteredClients.slice(startIndex, endIndex);
 
     tableBody.innerHTML = '';
-    clientsToShow.forEach(client => {
+    clientsToShow.forEach((client, index) => {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>
           <input type="checkbox" class="form-check-input client-checkbox" value="${client.id}" data-client-id="${client.id}">
         </td>
-        <td>${client.id || 'N/A'}</td>
+        <td>${client.display_id}</td>
         <td>${client.name || 'N/A'}</td>
         <td>${client.age || 'N/A'}</td>
         <td>${client.gender || 'N/A'}</td>
@@ -137,12 +165,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function initializeDashboard() {
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const mainContent = document.getElementById('mainContent');
-    const profileBtn = document.getElementById('profileBtn');
-    const profileDropdown = document.getElementById('profileDropdown');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const mainContent = document.getElementById('mainContent');
+  const profileBtn = document.getElementById('profileBtn');
+  const profileDropdown = document.getElementById('profileDropdown');
   
   // Toggle sidebar
   hamburgerBtn.addEventListener('click', function() {
@@ -242,137 +270,137 @@ document.addEventListener('DOMContentLoaded', function() {
       currentVisaTypeCount[client.type]++;
     });
 
-    // Create Age Distribution Chart
-    const ageCtx = document.getElementById('ageChart').getContext('2d');
+  // Create Age Distribution Chart
+  const ageCtx = document.getElementById('ageChart').getContext('2d');
     window.ageChart = new Chart(ageCtx, {
-      type: 'doughnut',
-      data: {
+    type: 'doughnut',
+    data: {
         labels: Object.keys(currentAgeGroups),
-        datasets: [{
+      datasets: [{
           data: Object.values(currentAgeGroups),
-          backgroundColor: [
-            '#FF6384',
-            '#36A2EB',
-            '#FFCE56',
-            '#4BC0C0'
-          ],
-          borderWidth: 2,
-          borderColor: '#fff',
-          cutout: '60%'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 10,
-              font: {
-                size: 11
-              }
+        backgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#4BC0C0'
+        ],
+        borderWidth: 2,
+        borderColor: '#fff',
+        cutout: '60%'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 10,
+            font: {
+              size: 11
             }
-          },
-          title: {
-            display: false
-          },
-          tooltip: {
-            enabled: true
           }
+        },
+        title: {
+          display: false
+        },
+        tooltip: {
+          enabled: true
         }
-      },
-      plugins: []
-    });
+      }
+    },
+    plugins: []
+  });
 
-    // Create Gender Distribution Chart
-    const genderCtx = document.getElementById('genderChart').getContext('2d');
+  // Create Gender Distribution Chart
+  const genderCtx = document.getElementById('genderChart').getContext('2d');
     window.genderChart = new Chart(genderCtx, {
-      type: 'doughnut',
-      data: {
+    type: 'doughnut',
+    data: {
         labels: Object.keys(currentGenderCount),
-        datasets: [{
+      datasets: [{
           data: Object.values(currentGenderCount),
-          backgroundColor: [
-            '#FF6384',
-            '#36A2EB',
-            '#FFCE56'
-          ],
-          borderWidth: 2,
-          borderColor: '#fff',
-          cutout: '60%'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 10,
-              font: {
-                size: 11
-              }
+        backgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56'
+        ],
+        borderWidth: 2,
+        borderColor: '#fff',
+        cutout: '60%'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 10,
+            font: {
+              size: 11
             }
-          },
-          title: {
-            display: false
-          },
-          tooltip: {
-            enabled: true
           }
+        },
+        title: {
+          display: false
+        },
+        tooltip: {
+          enabled: true
         }
-      },
-      plugins: []
-    });
+      }
+    },
+    plugins: []
+  });
 
-    // Create Visa Type Distribution Chart
-    const visaTypeCtx = document.getElementById('visaTypeChart').getContext('2d');
+  // Create Visa Type Distribution Chart
+  const visaTypeCtx = document.getElementById('visaTypeChart').getContext('2d');
     window.visaTypeChart = new Chart(visaTypeCtx, {
-      type: 'doughnut',
-      data: {
+    type: 'doughnut',
+    data: {
         labels: Object.keys(currentVisaTypeCount),
-        datasets: [{
+      datasets: [{
           data: Object.values(currentVisaTypeCount),
-          backgroundColor: [
-            '#FF6384',
-            '#36A2EB',
-            '#FFCE56',
-            '#4BC0C0',
-            '#9966FF',
-            '#FF9F40',
-            '#FF5722',
-            '#607D8B'
-          ],
-          borderWidth: 2,
-          borderColor: '#fff',
-          cutout: '60%'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 10,
-              font: {
-                size: 11
-              }
+        backgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#4BC0C0',
+          '#9966FF',
+          '#FF9F40',
+          '#FF5722',
+          '#607D8B'
+        ],
+        borderWidth: 2,
+        borderColor: '#fff',
+        cutout: '60%'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 10,
+            font: {
+              size: 11
             }
-          },
-          title: {
-            display: false
-          },
-          tooltip: {
-            enabled: true
           }
+        },
+        title: {
+          display: false
+        },
+        tooltip: {
+          enabled: true
         }
-      },
-      plugins: []
-    });
+      }
+    },
+    plugins: []
+  });
   }
 
   // Enhanced dashboard refresh function
@@ -400,6 +428,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update global data
         window.clientsData = data.clients;
+        
+        // Add frontend IDs - simple countdown system
+        // Backend orders by id DESC (newest first), so index 0 = newest client
+        window.clientsData.forEach((client, index) => {
+          // Frontend ID: newest client gets highest number (200), oldest gets lowest (1)
+          client.frontend_id = window.clientsData.length - index;
+          client.original_order = index; // Store original order for sorting
+        });
+        
         window.totalClients = data.totalClients;
         window.ageGroups = data.ageGroups;
         window.genderCounts = data.genderCounts;
@@ -411,6 +448,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update total clients count
         updateClientsCount();
+        
+        // Refresh display
+        displayClients();
+        updatePagination();
 
         // Refresh charts
         initializeCharts();
@@ -482,12 +523,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize charts on first load
   initializeCharts();
 
-  // Client Management Variables
-  let filteredClients = [...clients];
-  let currentPage = 1;
-  let clientsPerPage = 10;
-  let sortColumn = '';
-  let sortDirection = 'asc';
+  // Client Management Variables (filteredClients already declared globally)
+  currentPage = 1;
+  clientsPerPage = 10;
+  sortColumn = '';             // No column selected initially
+  sortDirection = 'asc';       // Default direction for when user clicks
 
   // Update clients count
   function updateClientsCount() {
@@ -538,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
       let bVal = b[column];
 
       // Handle different data types
-      if (column === 'age' || column === 'id') {
+      if (column === 'age' || column === 'frontend_id') {
         aVal = parseInt(aVal) || 0;
         bVal = parseInt(bVal) || 0;
       } else if (column === 'arrival_date') {
@@ -554,85 +594,12 @@ document.addEventListener('DOMContentLoaded', function() {
       return 0;
     });
 
+
+
     // Reset to first page and redisplay
     currentPage = 1;
     displayClients();
     updatePagination();
-  }
-
-  // Filter clients
-  function filterClients() {
-    const searchTerm = document.getElementById('searchClients').value.toLowerCase();
-    const genderFilter = document.getElementById('filterGender').value;
-    const locationFilter = document.getElementById('filterLocation').value;
-    const categoryFilter = document.getElementById('filterCategory').value;
-
-    // Use window.clientsData to get the most up-to-date data
-    const currentClients = window.clientsData || [];
-    filteredClients = currentClients.filter(client => {
-      const matchesSearch = !searchTerm || 
-        (client.name && client.name.toLowerCase().includes(searchTerm)) ||
-        (client.location && client.location.toLowerCase().includes(searchTerm)) ||
-        (client.phone && client.phone.toLowerCase().includes(searchTerm));
-      
-      const matchesGender = !genderFilter || client.gender === genderFilter;
-      const matchesLocation = !locationFilter || client.location === locationFilter;
-      const matchesCategory = !categoryFilter || client.type === categoryFilter;
-
-      return matchesSearch && matchesGender && matchesLocation && matchesCategory;
-    });
-
-    currentPage = 1;
-    updateClientsCount();
-    displayClients();
-    updatePagination();
-  }
-
-  // Display clients based on pagination
-  function displayClients() {
-    const tableBody = document.getElementById('allClientsTableBody');
-    const startIndex = (currentPage - 1) * clientsPerPage;
-    let endIndex;
-
-    if (clientsPerPage === 'all') {
-      endIndex = filteredClients.length;
-    } else {
-      endIndex = startIndex + parseInt(clientsPerPage);
-    }
-
-    const clientsToShow = filteredClients.slice(startIndex, endIndex);
-
-    tableBody.innerHTML = '';
-    clientsToShow.forEach(client => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>
-          <input type="checkbox" class="form-check-input client-checkbox" value="${client.id}" data-client-id="${client.id}">
-        </td>
-        <td>${client.id || 'N/A'}</td>
-        <td>${client.name || 'N/A'}</td>
-        <td>${client.age || 'N/A'}</td>
-        <td>${client.gender || 'N/A'}</td>
-        <td>${client.location || 'N/A'}</td>
-        <td>${client.type || 'N/A'}</td>
-        <td>${client.phone || 'N/A'}</td>
-        <td>${client.arrival_date ? new Date(client.arrival_date).toLocaleDateString() : 'N/A'}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary me-1" onclick="viewClient(${client.id})" title="View Details">
-            <i class="fas fa-eye"></i>
-          </button>
-          <button class="btn btn-sm btn-outline-warning" onclick="editClient(${client.id})" title="Edit Client">
-            <i class="fas fa-edit"></i>
-          </button>
-        </td>
-      `;
-      tableBody.appendChild(row);
-    });
-    
-    // Update selection state after rendering
-    if (typeof updateSelectedClients === 'function') {
-      updateSelectedClients();
-    }
   }
 
   // Update pagination
@@ -850,12 +817,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-    // Initialize client management
-    populateLocationFilter();
-    updateClientsCount();
-    displayClients();
-    updatePagination();
-    setupSelectionHandlers();
+  // Initialize client management
+  populateLocationFilter();
+  updateClientsCount();
+  displayClients();
+  updatePagination();
+  setupSelectionHandlers();
+  
+  // Don't show any column as selected by default
+  // The ID sorting works correctly (200, 199, 198...) but visually looks unselected
+  document.querySelectorAll('.sortable').forEach(th => {
+    th.classList.remove('asc', 'desc');
+  });
   } // End of initializeDashboard function
 
   // Selection handling functions  
@@ -912,11 +885,11 @@ document.addEventListener('DOMContentLoaded', function() {
       selectAllCheckbox.indeterminate = true;
     }
 
-    // Toggle button visibility
+    // Toggle button visibility (original logic)
     if (selectedClients.length > 0) {
       addClientBtn.style.display = 'none';
       deleteSelectedBtn.style.display = 'inline-block';
-      deleteSelectedBtn.innerHTML = `<i class="fas fa-trash-alt me-2"></i>Delete Selected (${selectedClients.length})`;
+      deleteSelectedBtn.innerHTML = `<i class="fas fa-trash-alt me-1"></i>Delete Selected (${selectedClients.length})`;
     } else {
       addClientBtn.style.display = 'inline-block';
       deleteSelectedBtn.style.display = 'none';
@@ -1041,6 +1014,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const formData = new FormData(e.target);
     const clientData = Object.fromEntries(formData.entries());
     
+    // Debug: Log the data being sent
+    console.log('Form data being sent:', clientData);
+    
     // Show loading state
     const submitBtn = document.querySelector('.btn-add-client');
     const originalText = submitBtn.innerHTML;
@@ -1048,6 +1024,7 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.disabled = true;
 
     try {
+      console.log('Sending request to add_client.php...');
       const response = await fetch('../backend/add_client.php', {
         method: 'POST',
         headers: {
@@ -1056,7 +1033,25 @@ document.addEventListener('DOMContentLoaded', function() {
         body: JSON.stringify(clientData)
       });
 
-      const result = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error('Invalid response from server');
+      }
+
+      console.log('Parsed result:', result);
 
       if (result.success) {
         hideAddClientModal();
@@ -1068,11 +1063,12 @@ document.addEventListener('DOMContentLoaded', function() {
           window.location.reload();
         });
       } else {
+        console.error('Add client failed:', result.message);
         showErrorModal('Add Client Failed', result.message);
       }
     } catch (error) {
       console.error('Error adding client:', error);
-      showErrorModal('Network Error', 'Unable to add client. Please try again.');
+      showErrorModal('Network Error', `Unable to add client. Please try again. Error: ${error.message}`);
     } finally {
       // Restore button state
       submitBtn.innerHTML = originalText;

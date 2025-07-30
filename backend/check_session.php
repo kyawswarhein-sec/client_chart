@@ -2,8 +2,15 @@
 session_start();
 header('Content-Type: application/json');
 
+// Debug logging
+error_log('Check session request received');
+error_log('Session ID: ' . session_id());
+error_log('Session admin: ' . (isset($_SESSION['admin']) ? $_SESSION['admin'] : 'NOT SET'));
+error_log('All session data: ' . json_encode($_SESSION));
+
 // Check if user is logged in
 if (!isset($_SESSION['admin'])) {
+    error_log('Session check failed - user not authenticated');
     echo json_encode(['authenticated' => false]);
     exit();
 }
@@ -11,8 +18,17 @@ if (!isset($_SESSION['admin'])) {
 // Include database connection
 include 'db.php';
 
+// Test database connection
+if ($conn->connect_error) {
+    error_log('Database connection failed in check_session: ' . $conn->connect_error);
+    echo json_encode(['authenticated' => true, 'admin' => $_SESSION['admin'], 'error' => 'Database connection failed']);
+    exit();
+}
+
+error_log('Session check passed for user: ' . $_SESSION['admin']);
+
 // Fetch real client data from database
-$clientsQuery = "SELECT * FROM clients ORDER BY arrival_date DESC";
+$clientsQuery = "SELECT * FROM clients ORDER BY id DESC";
 $clientsResult = $conn->query($clientsQuery);
 $clients = [];
 

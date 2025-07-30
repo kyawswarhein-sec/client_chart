@@ -9,7 +9,7 @@ if (!isset($_SESSION['admin'])) {
 }
 
 // Fetch real client data from database
-$clientsQuery = "SELECT * FROM clients ORDER BY arrival_date DESC";
+$clientsQuery = "SELECT * FROM clients ORDER BY id DESC";
 $clientsResult = $conn->query($clientsQuery);
 $clients = [];
 

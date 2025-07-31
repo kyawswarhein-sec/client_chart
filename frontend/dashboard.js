@@ -39,6 +39,10 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Initialize the dashboard
       initializeDashboard();
+      
+      // Initialize section navigation and splitter
+      initializeSectionNavigation();
+      initializeSplitter();
     })
     .catch(error => {
       console.error('Error checking session:', error);
@@ -53,11 +57,263 @@ document.addEventListener('DOMContentLoaded', function() {
   let sortDirection = 'asc';
   let selectedClients = [];
 
+  // Section Navigation System
+  let currentActiveSection = 'dashboard'; // Track current section
+  
+  function initializeSectionNavigation() {
+    const menuItems = document.querySelectorAll('.menu-item[data-section]');
+    const actionBtns = document.querySelectorAll('.action-btn[data-section]');
+    const sections = document.querySelectorAll('.content-section');
+    
+    // Function to ensure active state persists
+    function ensureActiveState(targetSection) {
+      setTimeout(() => {
+        const activeMenuItem = document.querySelector(`.menu-item[data-section="${targetSection}"]`);
+        if (activeMenuItem && !activeMenuItem.classList.contains('active')) {
+          console.log('Ensuring active state for:', targetSection);
+          menuItems.forEach(menu => menu.classList.remove('active'));
+          activeMenuItem.classList.add('active');
+        }
+      }, 100);
+    }
+    
+    // Handle sidebar menu clicks
+    menuItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetSection = item.getAttribute('data-section');
+        console.log('Sidebar menu clicked:', targetSection);
+        console.log('Item clicked:', item);
+        currentActiveSection = targetSection; // Update current section
+        
+        // Update active menu item FIRST
+        menuItems.forEach(menu => {
+          menu.classList.remove('active');
+          console.log('Removed active from:', menu.getAttribute('data-section'));
+        });
+        item.classList.add('active');
+        console.log('Added active to:', targetSection);
+        console.log('Item now has active class:', item.classList.contains('active'));
+        
+        // Show section AFTER updating active states
+        showSection(targetSection);
+        
+        // Ensure active state persists after any DOM operations
+        ensureActiveState(targetSection);
+      });
+    });
+    
+    // Handle quick action button clicks
+    actionBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetSection = btn.getAttribute('data-section');
+        currentActiveSection = targetSection; // Update current section
+        
+        // Update active menu item FIRST
+        menuItems.forEach(menu => menu.classList.remove('active'));
+        const correspondingMenuItem = document.querySelector(`.menu-item[data-section="${targetSection}"]`);
+        if (correspondingMenuItem) {
+          correspondingMenuItem.classList.add('active');
+          console.log('Action button - Added active to:', targetSection);
+          console.log('Action button - Item now has active class:', correspondingMenuItem.classList.contains('active'));
+        }
+        
+        // Show section AFTER updating active states
+        showSection(targetSection);
+        
+        // Ensure active state persists after any DOM operations
+        ensureActiveState(targetSection);
+      });
+    });
+    
+    // Add click handler for quick add client button
+    const addClientQuick = document.getElementById('addClientQuick');
+    if (addClientQuick) {
+      addClientQuick.addEventListener('click', () => {
+        document.getElementById('addClientModal').classList.add('active');
+      });
+    }
+    
+    function showSection(sectionId) {
+      console.log('showSection called with:', sectionId);
+      
+      // Hide all sections
+      sections.forEach(section => {
+        section.classList.remove('active');
+        console.log('Removed active from section:', section.id);
+      });
+      
+      // Show target section
+      const targetSection = document.getElementById(`${sectionId}-section`);
+      console.log('Target section found:', targetSection ? targetSection.id : 'NOT FOUND');
+      
+      if (targetSection) {
+        targetSection.classList.add('active');
+        console.log('Added active to section:', targetSection.id);
+        
+        // Update dashboard statistics when showing dashboard
+        if (sectionId === 'dashboard') {
+          updateDashboardStats();
+        }
+        
+        // Initialize charts when showing analytics
+        if (sectionId === 'analytics') {
+          setTimeout(() => {
+            initializeCharts();
+          }, 100);
+        }
+        
+        // Reload recent clients when showing recent clients
+        if (sectionId === 'recent-clients') {
+          populateRecentClientsTable();
+        }
+        
+        // Reload all clients when showing all clients
+        if (sectionId === 'all-clients') {
+          filterClients();
+          displayClients();
+          // Ensure sidebar stays highlighted after DOM operations
+          setTimeout(() => {
+            const activeMenuItem = document.querySelector(`.menu-item[data-section="all-clients"]`);
+            if (activeMenuItem && !activeMenuItem.classList.contains('active')) {
+              console.log('Re-applying active class after all-clients operations');
+              const menuItems = document.querySelectorAll('.menu-item[data-section]');
+              menuItems.forEach(menu => menu.classList.remove('active'));
+              activeMenuItem.classList.add('active');
+            }
+          }, 150);
+        }
+      } else {
+        console.error('Section not found:', `${sectionId}-section`);
+      }
+    }
+    
+    // Initialize with dashboard section
+    showSection('dashboard');
+  }
+  
+  // Dashboard Splitter Functionality
+  function initializeSplitter() {
+    const splitterHandle = document.getElementById('splitterHandle');
+    const leftPanel = document.querySelector('.left-panel');
+    const rightPanel = document.querySelector('.right-panel');
+    const splitterContainer = document.querySelector('.dashboard-splitter');
+    
+    if (!splitterHandle || !leftPanel || !rightPanel) return;
+    
+    let isDragging = false;
+    let startX = 0;
+    let startLeftWidth = 0;
+    
+    splitterHandle.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      startLeftWidth = leftPanel.offsetWidth;
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+      
+      // Add overlay to prevent iframe interference
+      const overlay = document.createElement('div');
+      overlay.id = 'splitter-overlay';
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.zIndex = '9999';
+      overlay.style.cursor = 'ew-resize';
+      document.body.appendChild(overlay);
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      
+      const deltaX = e.clientX - startX;
+      const containerWidth = splitterContainer.offsetWidth;
+      const newLeftWidth = startLeftWidth + deltaX;
+      const minWidth = 200;
+      const maxWidth = containerWidth - 200;
+      
+      if (newLeftWidth >= minWidth && newLeftWidth <= maxWidth) {
+        const leftPercent = (newLeftWidth / containerWidth) * 100;
+        const rightPercent = 100 - leftPercent;
+        
+        leftPanel.style.flex = `0 0 ${leftPercent}%`;
+        rightPanel.style.flex = `0 0 ${rightPercent}%`;
+      }
+    });
+    
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        
+        // Remove overlay
+        const overlay = document.getElementById('splitter-overlay');
+        if (overlay) {
+          overlay.remove();
+        }
+      }
+    });
+  }
+  
+  // Dashboard Statistics Update
+  function updateDashboardStats() {
+    if (!window.clientsData) return;
+    
+    const totalClients = window.clientsData.length;
+    const recentClients = window.clientsData.slice(0, 10).length; // Last 10 clients
+    const uniqueVisaTypes = [...new Set(window.clientsData.map(client => client.type))].length;
+    const uniqueLocations = [...new Set(window.clientsData.map(client => client.location))].length;
+    
+    // Update statistics
+    document.getElementById('totalClients').textContent = totalClients;
+    
+    const recentClientsEl = document.getElementById('recentClients');
+    if (recentClientsEl) {
+      recentClientsEl.textContent = recentClients;
+    }
+    
+    const visaTypesEl = document.getElementById('visaTypes');
+    if (visaTypesEl) {
+      visaTypesEl.textContent = uniqueVisaTypes;
+    }
+    
+    const locationsEl = document.getElementById('locations');
+    if (locationsEl) {
+      locationsEl.textContent = uniqueLocations;
+    }
+  }
+
+
+
   // Global functions (moved outside initializeDashboard for accessibility)
   function updateClientsCount() {
     document.getElementById('clientsCount').textContent = `${filteredClients.length} clients`;
     // Also update the total clients count in the statistics card
     document.getElementById('totalClients').textContent = window.clientsData.length;
+  }
+
+  // Populate recent clients table
+  function populateRecentClientsTable() {
+    const tableBody = document.getElementById('clientsTableBody');
+    if (!tableBody || !window.clientsData) return;
+    
+    tableBody.innerHTML = '';
+    window.clientsData.slice(0, 5).forEach(client => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${client.name || 'N/A'}</td>
+        <td>${client.age || 'N/A'}</td>
+        <td>${client.gender || 'N/A'}</td>
+        <td>${client.location || 'N/A'}</td>
+        <td>${client.type || 'N/A'}</td>
+        <td>${client.arrival_date ? new Date(client.arrival_date).toLocaleDateString() : 'N/A'}</td>
+      `;
+      tableBody.appendChild(row);
+    });
   }
 
   // Populate location filter
@@ -120,16 +376,21 @@ document.addEventListener('DOMContentLoaded', function() {
     calculateDisplayIds();
     
     const tableBody = document.getElementById('allClientsTableBody');
-    const startIndex = (currentPage - 1) * clientsPerPage;
-    let endIndex;
-
+    
     if (clientsPerPage === 'all') {
-      endIndex = filteredClients.length;
+      const clientsToShow = filteredClients;
+      renderClientsTable(clientsToShow, tableBody);
     } else {
-      endIndex = startIndex + parseInt(clientsPerPage);
+      const itemsPerPage = parseInt(clientsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const clientsToShow = filteredClients.slice(startIndex, endIndex);
+      renderClientsTable(clientsToShow, tableBody);
     }
+  }
 
-    const clientsToShow = filteredClients.slice(startIndex, endIndex);
+  // Helper function to render clients table
+  function renderClientsTable(clientsToShow, tableBody) {
 
     tableBody.innerHTML = '';
     clientsToShow.forEach((client, index) => {
@@ -159,44 +420,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Update selection state after rendering
-    if (typeof updateSelectedClients === 'function') {
+    if (selectedClients.length > 0) {
       updateSelectedClients();
     }
   }
 
   function initializeDashboard() {
-  const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const sidebar = document.getElementById('sidebar');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const mainContent = document.getElementById('mainContent');
   const profileBtn = document.getElementById('profileBtn');
   const profileDropdown = document.getElementById('profileDropdown');
-  
-  // Toggle sidebar
-  hamburgerBtn.addEventListener('click', function() {
-    sidebar.classList.toggle('active');
-    sidebarOverlay.classList.toggle('active');
-    mainContent.classList.toggle('sidebar-open');
-  });
-  
-  // Close sidebar when clicking overlay
-  sidebarOverlay.addEventListener('click', function() {
-    sidebar.classList.remove('active');
-    sidebarOverlay.classList.remove('active');
-    mainContent.classList.remove('sidebar-open');
-  });
-  
-  // Close sidebar when clicking menu items (mobile)
-  const menuItems = document.querySelectorAll('.menu-item');
-  menuItems.forEach(item => {
-    item.addEventListener('click', function() {
-      if (window.innerWidth <= 768) {
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-        mainContent.classList.remove('sidebar-open');
-      }
-    });
-  });
 
   // Toggle profile dropdown
   profileBtn.addEventListener('click', function(e) {
@@ -211,13 +442,85 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Close profile dropdown when clicking on menu items
+  // Handle profile menu items specifically
   const profileMenuItems = document.querySelectorAll('.profile-menu-item');
   profileMenuItems.forEach(item => {
-    item.addEventListener('click', function() {
+    item.addEventListener('click', function(e) {
+      const text = this.textContent.trim();
+      
+      if (text === 'Profile Settings') {
+        e.preventDefault();
+        openProfileSettingsModal();
+      } else if (text === 'Notifications') {
+        e.preventDefault();
+        toggleNotificationDropdown();
+      }
+      
+      // Close dropdown for all items
       profileDropdown.classList.remove('active');
     });
   });
+
+  // Notification system setup
+  const notificationBtn = document.getElementById('notificationBtn');
+  const notificationDropdown = document.getElementById('notificationDropdown');
+  const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+  // Toggle notification dropdown
+  notificationBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleNotificationDropdown();
+  });
+
+  // Mark all notifications as read
+  markAllReadBtn.addEventListener('click', function() {
+    markAllNotificationsAsRead();
+  });
+
+  // Close notification dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+      notificationDropdown.classList.remove('active');
+    }
+  });
+
+  // Load notifications on page load
+  loadNotifications();
+  
+  // Refresh notifications every 30 seconds
+  setInterval(loadNotifications, 30000);
+
+  // Theme toggle functionality
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  
+  // Load saved theme or default to light
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.body.setAttribute('data-theme', savedTheme);
+  updateThemeIcon(savedTheme);
+  
+  themeToggle.addEventListener('click', function() {
+    const currentTheme = document.body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+  });
+  
+  function updateThemeIcon(theme) {
+    if (theme === 'dark') {
+      themeIcon.className = 'fas fa-moon';
+      themeToggle.title = 'Dark Mode (Click to switch to Light Mode)';
+    } else {
+      themeIcon.className = 'fas fa-sun';
+      themeToggle.title = 'Light Mode (Click to switch to Dark Mode)';
+    }
+  }
+
+
+  
+
 
   // Get data from global variables
   const clients = window.clientsData || [];
@@ -677,14 +980,18 @@ document.addEventListener('DOMContentLoaded', function() {
   // Change page
   function changePage(page) {
     const totalPages = Math.ceil(filteredClients.length / parseInt(clientsPerPage));
+    
     if (page >= 1 && page <= totalPages && page !== currentPage) {
       currentPage = page;
       
-      // Smooth scroll to table
-      document.getElementById('allClientsTableBody').scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-      });
+      // Smooth scroll to All Clients section header
+      const allClientsSection = document.getElementById('all-clients-section');
+      if (allClientsSection) {
+        allClientsSection.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }
       
       // Add loading effect
       const tableBody = document.getElementById('allClientsTableBody');
@@ -726,8 +1033,8 @@ document.addEventListener('DOMContentLoaded', function() {
       { icon: 'fas fa-map-marker-alt', label: 'Location', value: client.location },
       { icon: 'fas fa-passport', label: 'Visa Type', value: client.type },
       { icon: 'fas fa-phone', label: 'Phone Number', value: client.phone },
-      { icon: 'fas fa-plane-arrival', label: 'Arrival Date', value: client.arrival_date ? new Date(client.arrival_date).toLocaleDateString() : null },
-      { icon: 'fas fa-plane-departure', label: 'US Arrival Date', value: client.us_arrival_date ? new Date(client.us_arrival_date).toLocaleDateString() : null },
+      { icon: 'fas fa-plane-departure', label: 'Myanmar Departure Date', value: client.arrival_date ? new Date(client.arrival_date).toLocaleDateString() : null },
+      { icon: 'fas fa-plane-arrival', label: 'US Arrival Date', value: client.us_arrival_date ? new Date(client.us_arrival_date).toLocaleDateString() : null },
       { icon: 'fas fa-calendar-times', label: 'Visa Expiry', value: client.visa_expiry_date ? new Date(client.visa_expiry_date).toLocaleDateString() : null },
       { icon: 'fas fa-sticky-note', label: 'Notes', value: client.note }
     ];
@@ -761,12 +1068,306 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Edit client function
   window.editClient = function(clientId) {
-    alert(`Edit functionality for client ID: ${clientId} - This would open an edit form.`);
+    const client = window.clientsData.find(c => c.id == clientId);
+    if (client) {
+      openEditClientModal(client);
+    } else {
+      showErrorModal('Client Not Found', 'Could not find client data for editing.');
+    }
   };
+
+  // Open edit client modal and populate with current data
+  function openEditClientModal(client) {
+    const modal = document.getElementById('editClientModal');
+    const form = document.getElementById('editClientForm');
+    const closeBtn = document.getElementById('editClientModalClose');
+    const cancelBtn = document.getElementById('editClientCancel');
+    const saveBtn = document.getElementById('editClientSave');
+    
+    // Populate form fields with current client data
+    document.getElementById('editClientId').value = client.id;
+    document.getElementById('editClientName').value = client.name || '';
+    document.getElementById('editClientAge').value = client.age || '';
+    document.getElementById('editClientGender').value = client.gender || '';
+    document.getElementById('editClientDob').value = client.dob || '';
+    document.getElementById('editClientLocation').value = client.location || '';
+    document.getElementById('editClientVisaType').value = client.type || '';
+    document.getElementById('editClientPhone').value = client.phone || '';
+    document.getElementById('editClientArrivalDate').value = client.arrival_date || '';
+    document.getElementById('editClientUsArrivalDate').value = client.us_arrival_date || '';
+    document.getElementById('editClientVisaExpiry').value = client.visa_expiry_date || '';
+    document.getElementById('editClientNote').value = client.note || '';
+    
+    // Clear any previous validation styling
+    clearEditFormValidation();
+    
+    // Show modal
+    modal.style.display = 'flex';
+    
+    // Focus on first input
+    setTimeout(() => {
+      document.getElementById('editClientName').focus();
+    }, 300);
+    
+    // Close handlers
+    closeBtn.onclick = () => hideEditClientModal();
+    cancelBtn.onclick = () => hideEditClientModal();
+    
+    // Save button handler - show confirmation modal
+    saveBtn.onclick = () => {
+      if (validateEditForm()) {
+        showSaveConfirmationModal();
+      }
+    };
+    
+    // Close on overlay click
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        hideEditClientModal();
+      }
+    };
+  }
+
+  function hideEditClientModal() {
+    const modal = document.getElementById('editClientModal');
+    modal.style.display = 'none';
+  }
+
+  function clearEditFormValidation() {
+    const formGroups = document.querySelectorAll('#editClientForm .form-group');
+    formGroups.forEach(group => {
+      group.classList.remove('error', 'success');
+      const errorMsg = group.querySelector('.error-message');
+      if (errorMsg) {
+        errorMsg.remove();
+      }
+    });
+  }
+
+  function validateEditForm() {
+    let isValid = true;
+    const requiredFields = [
+      { id: 'editClientName', name: 'Full Name' },
+      { id: 'editClientAge', name: 'Age' },
+      { id: 'editClientGender', name: 'Gender' },
+      { id: 'editClientLocation', name: 'Location' },
+      { id: 'editClientVisaType', name: 'Visa Type' }
+    ];
+
+    clearEditFormValidation();
+
+    requiredFields.forEach(field => {
+      const input = document.getElementById(field.id);
+      const formGroup = input.closest('.form-group');
+      const value = input.value.trim();
+
+      if (!value) {
+        showEditFieldError(formGroup, `${field.name} is required`);
+        isValid = false;
+      } else {
+        formGroup.classList.add('success');
+      }
+    });
+
+    // Additional validations
+    const age = document.getElementById('editClientAge').value;
+    if (age && (age < 1 || age > 120)) {
+      const formGroup = document.getElementById('editClientAge').closest('.form-group');
+      showEditFieldError(formGroup, 'Age must be between 1 and 120');
+      isValid = false;
+    }
+
+    const phone = document.getElementById('editClientPhone').value;
+    if (phone && !isValidPhone(phone)) {
+      const formGroup = document.getElementById('editClientPhone').closest('.form-group');
+      showEditFieldError(formGroup, 'Please enter a valid phone number');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  function showEditFieldError(formGroup, message) {
+    formGroup.classList.add('error');
+    formGroup.classList.remove('success');
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+    formGroup.appendChild(errorDiv);
+  }
+
+  // Show save confirmation modal
+  function showSaveConfirmationModal() {
+    const modal = document.getElementById('saveConfirmationModal');
+    const cancelBtn = document.getElementById('saveConfirmationCancel');
+    const okayBtn = document.getElementById('saveConfirmationOkay');
+    
+    modal.style.display = 'flex';
+    
+    // Handle cancel
+    cancelBtn.onclick = function() {
+      hideSaveConfirmationModal();
+    };
+    
+    // Handle okay - proceed with save
+    okayBtn.onclick = function() {
+      hideSaveConfirmationModal();
+      performClientUpdate();
+    };
+    
+    // Close on overlay click
+    modal.onclick = function(e) {
+      if (e.target === modal) {
+        hideSaveConfirmationModal();
+      }
+    };
+  }
+
+  function hideSaveConfirmationModal() {
+    const modal = document.getElementById('saveConfirmationModal');
+    modal.style.display = 'none';
+  }
+
+  // Perform the actual client update
+  async function performClientUpdate() {
+    try {
+      const form = document.getElementById('editClientForm');
+      const formData = new FormData(form);
+      const clientData = Object.fromEntries(formData.entries());
+      
+      console.log('Updating client with data:', clientData);
+      
+      // Show loading state on save button
+      const saveBtn = document.getElementById('editClientSave');
+      const originalText = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+      saveBtn.disabled = true;
+      
+      const response = await fetch('../backend/edit_client.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(clientData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error('Invalid response from server');
+      }
+
+      console.log('Parsed result:', result);
+
+      if (result.success) {
+        hideEditClientModal();
+        
+        // Update the client in global data
+        const clientIndex = window.clientsData.findIndex(c => c.id == clientData.id);
+        if (clientIndex !== -1) {
+          // Preserve the frontend_id and original_order
+          const updatedClient = result.client;
+          updatedClient.frontend_id = window.clientsData[clientIndex].frontend_id;
+          updatedClient.original_order = window.clientsData[clientIndex].original_order;
+          window.clientsData[clientIndex] = updatedClient;
+        }
+        
+        // Refresh only the affected client row (selective refresh)
+        refreshClientRow(clientData.id, result.client);
+        
+        // Show success message
+        showSuccessModal(`Client "${clientData.name}" updated successfully!`);
+        
+      } else {
+        console.error('Update client failed:', result.message);
+        showErrorModal('Update Failed', result.message);
+      }
+    } catch (error) {
+      console.error('Error updating client:', error);
+      showErrorModal('Network Error', `Unable to update client. Please try again. Error: ${error.message}`);
+    } finally {
+      // Restore button state
+      const saveBtn = document.getElementById('editClientSave');
+      if (saveBtn) {
+        saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Edit';
+        saveBtn.disabled = false;
+      }
+    }
+  }
+
+  // Selective refresh - update only the specific client row
+  function refreshClientRow(clientId, updatedClient) {
+    try {
+      // Find the table row for this client
+      const clientCheckbox = document.querySelector(`input[data-client-id="${clientId}"]`);
+      if (!clientCheckbox) {
+        console.log('Client row not found, performing full refresh');
+        filterClients(); // Fallback to full table refresh
+        return;
+      }
+      
+      const row = clientCheckbox.closest('tr');
+      if (!row) {
+        console.log('Table row not found, performing full refresh');
+        filterClients(); // Fallback to full table refresh
+        return;
+      }
+      
+      // Get the frontend_id from the global data
+      const clientInData = window.clientsData.find(c => c.id == clientId);
+      const displayId = clientInData ? clientInData.frontend_id : clientId;
+      
+      // Update the row content
+      row.innerHTML = `
+        <td>
+          <input type="checkbox" class="form-check-input client-checkbox" value="${updatedClient.id}" data-client-id="${updatedClient.id}">
+        </td>
+        <td>${displayId}</td>
+        <td>${updatedClient.name || 'N/A'}</td>
+        <td>${updatedClient.age || 'N/A'}</td>
+        <td>${updatedClient.gender || 'N/A'}</td>
+        <td>${updatedClient.location || 'N/A'}</td>
+        <td>${updatedClient.type || 'N/A'}</td>
+        <td>${updatedClient.phone || 'N/A'}</td>
+        <td>${updatedClient.arrival_date ? new Date(updatedClient.arrival_date).toLocaleDateString() : 'N/A'}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="viewClient(${updatedClient.id})" title="View Details">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-warning" onclick="editClient(${updatedClient.id})" title="Edit Client">
+            <i class="fas fa-edit"></i>
+          </button>
+        </td>
+      `;
+      
+      // Add a brief highlight effect to show the row was updated
+      row.style.backgroundColor = '#d4edda';
+      setTimeout(() => {
+        row.style.backgroundColor = '';
+      }, 2000);
+      
+      console.log('Client row updated successfully');
+      
+    } catch (error) {
+      console.error('Error refreshing client row:', error);
+      // Fallback to full table refresh
+      filterClients();
+    }
+  }
 
   // Event listeners
   document.getElementById('clientsPerPage').addEventListener('change', function() {
-    clientsPerPage = this.value;
+    clientsPerPage = this.value; // Keep as string to handle 'all' option
     currentPage = 1;
     displayClients();
     updatePagination();
@@ -785,20 +1386,8 @@ document.addEventListener('DOMContentLoaded', function() {
     filterClients();
   });
 
-  // Populate recent clients table
-  const tableBody = document.getElementById('clientsTableBody');
-  clients.slice(0, 5).forEach(client => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${client.name || 'N/A'}</td>
-      <td>${client.age || 'N/A'}</td>
-      <td>${client.gender || 'N/A'}</td>
-      <td>${client.location || 'N/A'}</td>
-      <td>${client.type || 'N/A'}</td>
-      <td>${client.arrival_date ? new Date(client.arrival_date).toLocaleDateString() : 'N/A'}</td>
-    `;
-    tableBody.appendChild(row);
-  });
+  // Initialize recent clients table on first load
+  populateRecentClientsTable();
 
   // Add sorting event listeners
   document.querySelectorAll('.sortable').forEach(header => {
@@ -829,13 +1418,486 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.sortable').forEach(th => {
     th.classList.remove('asc', 'desc');
   });
+  // Profile Settings Functions
+  async function openProfileSettingsModal() {
+    try {
+      // Fetch current profile data
+      const response = await fetch('../backend/get_profile.php');
+      const result = await response.json();
+      
+      if (result.success) {
+        const modal = document.getElementById('profileSettingsModal');
+        const form = document.getElementById('profileSettingsForm');
+        const closeBtn = document.getElementById('profileSettingsModalClose');
+        const cancelBtn = document.getElementById('profileSettingsCancel');
+        const saveBtn = document.getElementById('profileSettingsSave');
+        
+        // Populate form with current admin name
+        document.getElementById('adminName').value = result.admin.username || '';
+        
+        // Clear password fields
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        
+        // Clear any previous validation styling
+        clearProfileFormValidation();
+        
+        // Show modal
+        modal.style.display = 'flex';
+        
+        // Focus on admin name field
+        setTimeout(() => {
+          document.getElementById('adminName').focus();
+        }, 300);
+        
+        // Close handlers
+        closeBtn.onclick = () => hideProfileSettingsModal();
+        cancelBtn.onclick = () => hideProfileSettingsModal();
+        
+        // Save button handler
+        saveBtn.onclick = () => {
+          if (validateProfileForm()) {
+            showProfileSaveConfirmationModal();
+          }
+        };
+        
+        // Close on overlay click
+        modal.onclick = (e) => {
+          if (e.target === modal) {
+            hideProfileSettingsModal();
+          }
+        };
+        
+      } else {
+        showErrorModal('Profile Error', 'Could not load profile data');
+      }
+    } catch (error) {
+      console.error('Error opening profile settings:', error);
+      showErrorModal('Network Error', 'Unable to load profile settings');
+    }
+  }
+
+  function hideProfileSettingsModal() {
+    const modal = document.getElementById('profileSettingsModal');
+    modal.style.display = 'none';
+  }
+
+  function clearProfileFormValidation() {
+    const formGroups = document.querySelectorAll('#profileSettingsForm .form-group');
+    formGroups.forEach(group => {
+      group.classList.remove('error', 'success');
+      const errorMsg = group.querySelector('.error-message');
+      if (errorMsg) {
+        errorMsg.remove();
+      }
+    });
+  }
+
+  function validateProfileForm() {
+    let isValid = true;
+    clearProfileFormValidation();
+    
+    const adminName = document.getElementById('adminName').value.trim();
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    // Validate admin name
+    if (!adminName) {
+      showProfileFieldError(document.getElementById('adminName').closest('.form-group'), 'Admin name is required');
+      isValid = false;
+    } else if (adminName.length < 2) {
+      showProfileFieldError(document.getElementById('adminName').closest('.form-group'), 'Admin name must be at least 2 characters long');
+      isValid = false;
+    } else {
+      document.getElementById('adminName').closest('.form-group').classList.add('success');
+    }
+    
+    // Validate password fields (only if user is trying to change password)
+    const isChangingPassword = currentPassword || newPassword || confirmPassword;
+    
+    if (isChangingPassword) {
+      if (!currentPassword) {
+        showProfileFieldError(document.getElementById('currentPassword').closest('.form-group'), 'Current password is required');
+        isValid = false;
+      } else {
+        document.getElementById('currentPassword').closest('.form-group').classList.add('success');
+      }
+      
+      if (!newPassword) {
+        showProfileFieldError(document.getElementById('newPassword').closest('.form-group'), 'New password is required');
+        isValid = false;
+      } else if (newPassword.length < 6) {
+        showProfileFieldError(document.getElementById('newPassword').closest('.form-group'), 'New password must be at least 6 characters long');
+        isValid = false;
+      } else {
+        document.getElementById('newPassword').closest('.form-group').classList.add('success');
+      }
+      
+      if (!confirmPassword) {
+        showProfileFieldError(document.getElementById('confirmPassword').closest('.form-group'), 'Please confirm new password');
+        isValid = false;
+      } else if (newPassword !== confirmPassword) {
+        showProfileFieldError(document.getElementById('confirmPassword').closest('.form-group'), 'Passwords do not match');
+        isValid = false;
+      } else {
+        document.getElementById('confirmPassword').closest('.form-group').classList.add('success');
+      }
+    }
+    
+    return isValid;
+  }
+
+  function showProfileFieldError(formGroup, message) {
+    formGroup.classList.add('error');
+    formGroup.classList.remove('success');
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+    formGroup.appendChild(errorDiv);
+  }
+
+  function showProfileSaveConfirmationModal() {
+    const modal = document.getElementById('profileSaveConfirmationModal');
+    const cancelBtn = document.getElementById('profileSaveConfirmationCancel');
+    const okayBtn = document.getElementById('profileSaveConfirmationOkay');
+    
+    modal.style.display = 'flex';
+    
+    // Handle cancel
+    cancelBtn.onclick = function() {
+      hideProfileSaveConfirmationModal();
+    };
+    
+    // Handle okay - proceed with save
+    okayBtn.onclick = function() {
+      hideProfileSaveConfirmationModal();
+      performProfileUpdate();
+    };
+    
+    // Close on overlay click
+    modal.onclick = function(e) {
+      if (e.target === modal) {
+        hideProfileSaveConfirmationModal();
+      }
+    };
+  }
+
+  function hideProfileSaveConfirmationModal() {
+    const modal = document.getElementById('profileSaveConfirmationModal');
+    modal.style.display = 'none';
+  }
+
+  async function performProfileUpdate() {
+    try {
+      const form = document.getElementById('profileSettingsForm');
+      const formData = new FormData(form);
+      const profileData = Object.fromEntries(formData.entries());
+      
+      // Only include password fields if they have values
+      const updateData = {
+        name: profileData.name
+      };
+      
+      if (profileData.current_password) {
+        updateData.current_password = profileData.current_password;
+        updateData.new_password = profileData.new_password;
+        updateData.confirm_password = profileData.confirm_password;
+      }
+      
+      console.log('Updating profile with data:', updateData);
+      
+      // Show loading state on save button
+      const saveBtn = document.getElementById('profileSettingsSave');
+      const originalText = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+      saveBtn.disabled = true;
+      
+      const response = await fetch('../backend/update_profile.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error('Invalid response from server');
+      }
+
+      console.log('Parsed result:', result);
+
+      if (result.success) {
+        hideProfileSettingsModal();
+        
+        // Show success message and auto-logout
+        let message = 'Profile updated successfully! Redirecting to login...';
+        
+        showSuccessModal(message, function() {
+          // Auto-logout and redirect after success modal is closed
+          performAutoLogout();
+        });
+        
+        // Also auto-logout after 2 seconds even if user doesn't click the modal
+        setTimeout(() => {
+          performAutoLogout();
+        }, 2000);
+        
+      } else {
+        console.error('Update profile failed:', result.message);
+        showErrorModal('Update Failed', result.message);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      showErrorModal('Network Error', `Unable to update profile. Please try again. Error: ${error.message}`);
+    } finally {
+      // Restore button state
+      const saveBtn = document.getElementById('profileSettingsSave');
+      if (saveBtn) {
+        saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Changes';
+        saveBtn.disabled = false;
+      }
+    }
+  }
+
+  // Notification system functions
+  async function loadNotifications() {
+    try {
+      const response = await fetch('../backend/get_notifications.php');
+      const result = await response.json();
+      
+      if (result.success) {
+        window.notificationsData = result.notifications;
+        updateNotificationBadge(result.unreadCount);
+        renderNotifications(result.notifications);
+      } else {
+        console.error('Failed to load notifications:', result.message);
+      }
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    }
+  }
+
+  function updateNotificationBadge(count) {
+    const badge = document.getElementById('notificationBadge');
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function toggleNotificationDropdown() {
+    const dropdown = document.getElementById('notificationDropdown');
+    dropdown.classList.toggle('active');
+    
+    // Close profile dropdown if open
+    const profileDropdown = document.getElementById('profileDropdown');
+    profileDropdown.classList.remove('active');
+  }
+
+  function renderNotifications(notifications) {
+    const notificationList = document.getElementById('notificationList');
+    
+    if (notifications.length === 0) {
+      notificationList.innerHTML = `
+        <div class="no-notifications">
+          <i class="fas fa-bell-slash"></i>
+          <p>No notifications</p>
+        </div>
+      `;
+      return;
+    }
+
+    notificationList.innerHTML = notifications.map(notification => `
+      <div class="notification-item ${notification.is_read ? 'read' : 'unread'}" 
+           data-notification-id="${notification.id}">
+        <div class="notification-content">
+          <div class="notification-icon ${notification.type}">
+            <i class="fas ${getNotificationIcon(notification.type)}"></i>
+          </div>
+          <div class="notification-text">
+            <h6 class="notification-title">${notification.title}</h6>
+            <p class="notification-message">${notification.message}</p>
+            <small class="notification-time">${formatNotificationTime(notification.created_at)}</small>
+          </div>
+          ${!notification.is_read ? `
+            <button class="mark-read-btn" onclick="markNotificationAsRead(${notification.id})">
+              <i class="fas fa-check"></i>
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function getNotificationIcon(type) {
+    switch (type) {
+      case 'success': return 'fa-check-circle';
+      case 'warning': return 'fa-exclamation-triangle';
+      case 'error': return 'fa-times-circle';
+      default: return 'fa-info-circle';
+    }
+  }
+
+  function formatNotificationTime(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  }
+
+  // Global function for marking single notification as read
+  window.markNotificationAsRead = async function(notificationId) {
+    try {
+      const response = await fetch('../backend/mark_notification_read.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ notificationId: notificationId })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Update the notification in our data
+        if (window.notificationsData) {
+          const notification = window.notificationsData.find(n => n.id == notificationId);
+          if (notification) {
+            notification.is_read = 1;
+            notification.read_at = new Date().toISOString();
+          }
+        }
+        
+        // Update the UI
+        updateNotificationBadge(result.unreadCount);
+        const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (notificationElement) {
+          notificationElement.classList.remove('unread');
+          notificationElement.classList.add('read');
+          const markReadBtn = notificationElement.querySelector('.mark-read-btn');
+          if (markReadBtn) {
+            markReadBtn.remove();
+          }
+        }
+      } else {
+        console.error('Failed to mark notification as read:', result.message);
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  async function markAllNotificationsAsRead() {
+    try {
+      const response = await fetch('../backend/mark_all_notifications_read.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Update all notifications in our data
+        if (window.notificationsData) {
+          window.notificationsData.forEach(notification => {
+            notification.is_read = 1;
+            notification.read_at = new Date().toISOString();
+          });
+        }
+        
+        // Update the UI
+        updateNotificationBadge(0);
+        const notificationItems = document.querySelectorAll('.notification-item');
+        notificationItems.forEach(item => {
+          item.classList.remove('unread');
+          item.classList.add('read');
+          const markReadBtn = item.querySelector('.mark-read-btn');
+          if (markReadBtn) {
+            markReadBtn.remove();
+          }
+        });
+        
+        showSuccessModal(`${result.markedCount} notifications marked as read!`);
+      } else {
+        console.error('Failed to mark all notifications as read:', result.message);
+        showErrorModal('Error', 'Failed to mark notifications as read');
+      }
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      showErrorModal('Network Error', 'Unable to mark notifications as read');
+    }
+  }
+
+  // Auto-logout function for profile updates
+  async function performAutoLogout() {
+    try {
+      console.log('Performing auto-logout after profile update...');
+      
+      // Clear any local session data
+      if (window.clientsData) {
+        window.clientsData = null;
+      }
+      
+      // Call the logout endpoint to clear server-side session
+      await fetch('../backend/logout.php', {
+        method: 'GET',
+        credentials: 'include' // Include cookies
+      });
+      
+      // Clear all cookies by setting them to expire
+      document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+      });
+      
+      // Additional cookie clearing for common PHP session cookies
+      document.cookie = 'PHPSESSID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      
+      console.log('Logout completed, redirecting to login...');
+      
+      // Small delay to ensure logout is processed
+      setTimeout(() => {
+        window.location.href = './login.html';
+      }, 500);
+      
+    } catch (error) {
+      console.error('Error during auto-logout:', error);
+      // Fallback: still redirect even if logout call fails
+      window.location.href = './login.html';
+    }
+  }
+
   } // End of initializeDashboard function
 
   // Selection handling functions  
   function setupSelectionHandlers() {
     const selectAllCheckbox = document.getElementById('selectAll');
-    const addClientBtn = document.getElementById('addClientBtn');
-    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const dynamicActionBtn = document.getElementById('dynamicActionBtn');
 
     // Handle select all checkbox
     selectAllCheckbox.addEventListener('change', function() {
@@ -853,22 +1915,27 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    // Add client button click
-    addClientBtn.addEventListener('click', function() {
-      openAddClientModal();
-    });
-
-    // Delete selected button click
-    deleteSelectedBtn.addEventListener('click', function() {
+      // Dynamic action button click - handles both add and delete based on current state
+  dynamicActionBtn.addEventListener('click', function() {
+    const selectedClients = document.querySelectorAll('.client-checkbox:checked');
+    if (selectedClients.length > 0) {
       deleteSelectedClients();
-    });
-  }
+    } else {
+    openAddClientModal();
+    }
+  });
+
+  // Initialize add client modal handlers
+  initializeAddClientModal();
+  
+  // Initialize hamburger button functionality
+  initializeHamburgerButton();
+}
 
   function updateSelectedClients() {
     const clientCheckboxes = document.querySelectorAll('.client-checkbox:checked');
     const selectAllCheckbox = document.getElementById('selectAll');
-    const addClientBtn = document.getElementById('addClientBtn');
-    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const dynamicActionBtn = document.getElementById('dynamicActionBtn');
     
     selectedClients = Array.from(clientCheckboxes).map(cb => cb.getAttribute('data-client-id'));
     
@@ -885,22 +1952,82 @@ document.addEventListener('DOMContentLoaded', function() {
       selectAllCheckbox.indeterminate = true;
     }
 
-    // Toggle button visibility (original logic)
+    // Update dynamic button based on selection state
     if (selectedClients.length > 0) {
-      addClientBtn.style.display = 'none';
-      deleteSelectedBtn.style.display = 'inline-block';
-      deleteSelectedBtn.innerHTML = `<i class="fas fa-trash-alt me-1"></i>Delete Selected (${selectedClients.length})`;
+      // Change to delete mode
+      dynamicActionBtn.className = 'btn btn-danger w-100';
+      dynamicActionBtn.innerHTML = `<i class="fas fa-trash-alt me-1"></i>Delete Selected (${selectedClients.length})`;
     } else {
-      addClientBtn.style.display = 'inline-block';
-      deleteSelectedBtn.style.display = 'none';
+      // Change to add mode
+      dynamicActionBtn.className = 'btn btn-success w-100';
+      dynamicActionBtn.innerHTML = '<i class="fas fa-user-plus me-1"></i>Add Client';
     }
+  }
+
+  function initializeHamburgerButton() {
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    
+    if (hamburgerBtn && sidebar) {
+      hamburgerBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Toggle sidebar
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+        document.body.classList.toggle('sidebar-open');
+        
+        console.log('Hamburger clicked - Sidebar active:', sidebar.classList.contains('active'));
+      });
+      
+      // Close sidebar when clicking overlay
+      if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function() {
+          sidebar.classList.remove('active');
+          sidebarOverlay.classList.remove('active');
+          document.body.classList.remove('sidebar-open');
+        });
+      }
+      
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 1024) {
+          if (!sidebar.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+          }
+        }
+      });
+    }
+  }
+
+  function initializeAddClientModal() {
+    const modal = document.getElementById('addClientModal');
+    const form = document.getElementById('addClientForm');
+    const closeBtn = document.getElementById('addClientModalClose');
+    const cancelBtn = document.getElementById('addClientCancel');
+    
+    // Set up event listeners once
+    closeBtn.addEventListener('click', hideAddClientModal);
+    cancelBtn.addEventListener('click', hideAddClientModal);
+    
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        hideAddClientModal();
+      }
+    });
+    
+    // Form submission
+    form.addEventListener('submit', handleAddClientSubmit);
   }
 
   function openAddClientModal() {
     const modal = document.getElementById('addClientModal');
     const form = document.getElementById('addClientForm');
-    const closeBtn = document.getElementById('addClientModalClose');
-    const cancelBtn = document.getElementById('addClientCancel');
     
     // Reset form
     form.reset();
@@ -913,20 +2040,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
       document.getElementById('clientName').focus();
     }, 300);
-    
-    // Close handlers
-    closeBtn.onclick = () => hideAddClientModal();
-    cancelBtn.onclick = () => hideAddClientModal();
-    
-    // Close on overlay click
-    modal.onclick = (e) => {
-      if (e.target === modal) {
-        hideAddClientModal();
-      }
-    };
-    
-    // Form submission
-    form.onsubmit = handleAddClientSubmit;
   }
 
   function hideAddClientModal() {
@@ -1325,4 +2438,4 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
-}); 
+});

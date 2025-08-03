@@ -1,4 +1,4 @@
-# 📊 Client Chart Dashboard
+# 📊 Client Management Admin Dashboard
 
 A comprehensive web-based admin dashboard for client management with real-time data visualization, built with PHP, MySQL, HTML5, CSS3, and JavaScript.
 

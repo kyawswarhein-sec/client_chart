@@ -1,0 +1,984 @@
+/* UI Improvements for Dashboard */
+
+/* 1. Search Bar - Fix magnifying icon spacing */
+.search-input {
+  position: relative;
+  width: 100%;
+}
+
+.search-input .form-control {
+  padding-left: 1rem !important;
+  padding-right: 3.5rem !important;
+  width: 100%;
+  min-width: 200px;
+  max-width: 240px;
+  font-size: 0.9rem;
+  border: 1px solid #ced4da !important;
+  border-radius: 0.375rem;
+  background-color: #fff;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  height: 38px;
+}
+
+.search-input .form-control:focus {
+  border-color: #6A1B1A !important;
+  box-shadow: 0 0 0 0.2rem rgba(106, 27, 26, 0.25) !important;
+  outline: none;
+}
+
+/* Force remove any existing ::before pseudo-element */
+.search-input::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* Add search icon on the right side */
+.search-input::after {
+  content: '\f002' !important;
+  font-family: 'Font Awesome 6 Free' !important;
+  font-weight: 900 !important;
+  position: absolute !important;
+  right: 1.25rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: #6c757d !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  font-size: 0.9rem !important;
+}
+
+/* Additional override for any existing search icon styles */
+.search-input .form-control::before,
+.search-input .form-control::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Override ux-improvements.css search input styles */
+.search-input {
+  position: relative !important;
+}
+
+.search-input .form-control {
+  padding-left: 1rem !important;
+  padding-right: 3rem !important;
+}
+
+/* Override the conflicting ::before from ux-improvements.css */
+.search-input::before {
+  display: none !important;
+  content: none !important;
+  left: auto !important;
+  right: 1rem !important;
+}
+
+/* Force override any existing search input styles */
+.search-input {
+  position: relative !important;
+}
+
+.search-input .form-control {
+  padding-left: 1rem !important;
+  padding-right: 3.5rem !important;
+}
+
+/* Completely remove any left-side icon */
+.search-input::before,
+.search-input .form-control::before {
+  display: none !important;
+  content: none !important;
+  left: auto !important;
+  right: auto !important;
+}
+
+/* 2. Filter Width - Minimize all filters */
+.filter-row .col-md-2:nth-child(2) .form-select,
+.filter-row .col-md-2:nth-child(3) .form-select,
+.filter-row .col-md-2:nth-child(4) .form-select {
+  min-width: 110px;
+  max-width: 130px;
+  font-size: 0.85rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  background-color: #fff;
+  padding: 0.5rem 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 38px;
+}
+
+/* 3. Button Width - Minimize Reset and Add Client buttons */
+.filter-row .col-md-2:nth-child(5) .btn {
+  min-width: 80px;
+  max-width: 90px;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  padding: 0.5rem 0.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-row .col-md-2:nth-child(6) .btn {
+  min-width: 110px;
+  max-width: 120px;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Table Action Buttons Spacing */
+.table .btn {
+  margin: 0 0.25rem;
+  min-width: 32px;
+  height: 32px;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease-in-out;
+}
+
+.table .btn:first-child {
+  margin-left: 0;
+}
+
+.table .btn:last-child {
+  margin-right: 0;
+}
+
+/* Ensure all filter elements are visible */
+.filter-row .col-md-2 {
+  display: flex !important;
+  flex-direction: column;
+  margin-bottom: 0;
+  flex-shrink: 0;
+  min-width: 0;
+  width: auto;
+  padding: 0 0.5rem;
+}
+
+/* Override Bootstrap column widths to fit all elements */
+.filter-row .col-md-2:nth-child(1) {
+  flex: 1;
+  min-width: 200px;
+  max-width: 240px;
+}
+
+.filter-row .col-md-2:nth-child(2),
+.filter-row .col-md-2:nth-child(3),
+.filter-row .col-md-2:nth-child(4) {
+  flex: 1;
+  min-width: 110px;
+  max-width: 120px;
+}
+
+.filter-row .col-md-2:nth-child(5) {
+  flex: 0 0 auto;
+  min-width: 80px;
+  max-width: 90px;
+}
+
+.filter-row .col-md-2:nth-child(6) {
+  flex: 0 0 auto;
+  min-width: 110px;
+  max-width: 120px;
+}
+
+.filter-row .col-md-2:nth-child(5) .btn {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  border-color: #6A1B1A;
+  color: #fff;
+}
+
+.filter-row .col-md-2:nth-child(5) .btn:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+  border-color: #4A1413;
+}
+
+.filter-row .col-md-2:nth-child(6) .btn {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  border-color: #6A1B1A;
+  color: #fff;
+}
+
+.filter-row .col-md-2:nth-child(6) .btn:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+  border-color: #4A1413;
+}
+
+/* 4. Add Client Modal - Fix close button */
+.add-client-modal .modal-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.add-client-modal .modal-title {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.add-client-modal .modal-close {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.add-client-modal .modal-close:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+/* Add Client Modal Footer Button Spacing */
+.add-client-modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.add-client-modal .modal-footer .btn {
+  min-width: 120px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.add-client-modal .modal-footer .btn-cancel {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  border-color: #6A1B1A;
+  color: #ffffff;
+}
+
+.add-client-modal .modal-footer .btn-cancel:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+  border-color: #4A1413;
+}
+
+.add-client-modal .modal-footer .btn-add-client {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  border-color: #6A1B1A;
+  color: #ffffff;
+}
+
+.add-client-modal .modal-footer .btn-add-client:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+  border-color: #4A1413;
+}
+
+/* Edit Client Modal - Same styling as Add Client Modal */
+.edit-client-modal .modal-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.edit-client-modal .modal-title {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.edit-client-modal .modal-close {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.edit-client-modal .modal-close:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+/* Edit Client Modal Footer Button Spacing */
+.edit-client-modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.edit-client-modal .modal-footer .btn {
+  min-width: 120px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.edit-client-modal .modal-footer .btn-cancel {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  border-color: #6A1B1A;
+  color: #ffffff;
+}
+
+.edit-client-modal .modal-footer .btn-cancel:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+  border-color: #4A1413;
+}
+
+.edit-client-modal .modal-footer .btn-primary {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  border-color: #6A1B1A;
+  color: #ffffff;
+}
+
+.edit-client-modal .modal-footer .btn-primary:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+  border-color: #4A1413;
+}
+
+/* 5. All Modal Buttons - Pill Style */
+.btn-modal {
+  border-radius: 50px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  border: none !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+}
+
+.btn-modal:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.btn-modal.btn-cancel {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  color: #ffffff !important;
+}
+
+.btn-modal.btn-cancel:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+}
+
+.btn-modal.btn-success {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  color: #ffffff !important;
+}
+
+.btn-modal.btn-success:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+}
+
+.btn-modal.btn-primary {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  color: #ffffff !important;
+}
+
+.btn-modal.btn-primary:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+}
+
+.btn-modal.btn-danger {
+  background: #dc3545;
+  color: #ffffff !important;
+}
+
+.btn-modal.btn-danger:hover {
+  background: #c82333;
+}
+
+/* 6. Client Details Modal - Better organization */
+.client-details-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.client-details-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.client-details-section h6 {
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.client-details-section .detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.client-details-section .detail-item:last-child {
+  border-bottom: none;
+}
+
+.client-details-section .detail-label {
+  font-weight: 500;
+  color: #6c757d;
+  min-width: 120px;
+}
+
+.client-details-section .detail-value {
+  color: #212529;
+  text-align: right;
+  flex: 1;
+}
+
+.client-details-section .detail-value.empty {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* 7. Remove Logout from Sidebar */
+.sidebar-menu .menu-item[data-section="logout"] {
+  display: none !important;
+}
+
+/* Add Client Button in Sidebar */
+.sidebar-menu .menu-item[data-section="add-client"] {
+  background: linear-gradient(135deg, #6A1B1A, #4A1413);
+  color: white !important;
+  font-weight: 500;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  transition: all 0.3s ease;
+}
+
+.sidebar-menu .menu-item[data-section="add-client"]:hover {
+  background: linear-gradient(135deg, #4A1413, #3A1010);
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(106, 27, 26, 0.3);
+  color: white !important;
+}
+
+.sidebar-menu .menu-item[data-section="add-client"] i {
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+}
+
+/* 8. Dark Mode Text Colors */
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="dark"] body {
+  background-color: #1a1a1a;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .header {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  border-bottom: 1px solid #4A1413;
+}
+
+[data-theme="dark"] .sidebar {
+  background: #2d2d2d;
+  border-right: 1px solid #404040;
+}
+
+[data-theme="dark"] .main-content {
+  background: #1a1a1a;
+}
+
+[data-theme="dark"] .card {
+  background: #2d2d2d;
+  border: 1px solid #404040;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .card-header {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%) !important;
+  border-bottom: 1px solid #4A1413 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .card-header.bg-light {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%) !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #4A1413 !important;
+}
+
+[data-theme="dark"] .card-header.bg-light .card-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .card-header .card-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Dark mode analytics cards with maroon theme */
+[data-theme="dark"] .card {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%) !important;
+  border: 1px solid #4A1413 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .card-body {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .card .card-body {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .card .card-title,
+[data-theme="dark"] .card h6.card-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .card canvas {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px;
+}
+
+[data-theme="dark"] .card-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .form-control {
+  background: #3d3d3d;
+  border-color: #555;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .form-control:focus {
+  background: #3d3d3d;
+  border-color: #6A1B1A;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .form-control::placeholder {
+  color: #ffffff !important;
+  opacity: 0.7;
+}
+
+[data-theme="dark"] .form-select {
+  background: #3d3d3d;
+  border-color: #555;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .form-select:focus {
+  background: #3d3d3d;
+  border-color: #6A1B1A;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .table {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .table th {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%) !important;
+  color: #ffffff !important;
+  border-color: #4A1413;
+}
+
+[data-theme="dark"] .table td {
+  border-color: #404040;
+  color: #ffffff !important;
+  background-color: #2d2d2d;
+}
+
+[data-theme="dark"] .table-striped tbody tr:nth-of-type(odd) {
+  background-color: #3d3d3d;
+}
+
+[data-theme="dark"] .table-striped tbody tr:nth-of-type(even) {
+  background-color: #2d2d2d;
+}
+
+[data-theme="dark"] .table-hover tbody tr:hover {
+  background-color: rgba(106, 27, 26, 0.2) !important;
+}
+
+[data-theme="dark"] .modal-content {
+  background: #2d2d2d;
+  border: 1px solid #404040;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .modal-header {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%) !important;
+  border-bottom: 1px solid #4A1413 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .modal-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .modal-close {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .modal-title {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .modal-body {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .modal-footer {
+  background: #3d3d3d;
+  border-top: 1px solid #404040;
+}
+
+[data-theme="dark"] .section-header h1 {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .section-header {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .section-header p {
+  color: #ffffff !important;
+  opacity: 0.9;
+}
+
+[data-theme="dark"] .text-muted {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .logo {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .admin-text {
+  color: #ffffff !important;
+  opacity: 0.9;
+}
+
+/* Dark mode pagination */
+[data-theme="dark"] .pagination .page-link {
+  color: #6A1B1A !important;
+  border-color: #6A1B1A !important;
+  background-color: #ffffff !important;
+}
+
+[data-theme="dark"] .pagination .page-link:hover {
+  background-color: #6A1B1A !important;
+  color: #ffffff !important;
+  border-color: #6A1B1A !important;
+}
+
+[data-theme="dark"] .pagination .page-item.active .page-link {
+  background-color: #6A1B1A !important;
+  color: #ffffff !important;
+  border-color: #6A1B1A !important;
+}
+
+[data-theme="dark"] .pagination .page-item.disabled .page-link {
+  color: #6c757d !important;
+  border-color: #dee2e6 !important;
+  background-color: #ffffff !important;
+}
+
+/* Dark mode pagination arrows with permanent maroon color */
+[data-theme="dark"] .pagination .page-link[aria-label="Previous"],
+[data-theme="dark"] .pagination .page-link[aria-label="Next"] {
+  color: #6A1B1A !important;
+  border-color: #6A1B1A !important;
+  background-color: #ffffff !important;
+}
+
+[data-theme="dark"] .pagination .page-link[aria-label="Previous"]:hover,
+[data-theme="dark"] .pagination .page-link[aria-label="Next"]:hover {
+  background-color: #6A1B1A !important;
+  color: #ffffff !important;
+  border-color: #6A1B1A !important;
+}
+
+[data-theme="dark"] .pagination .page-link span[aria-hidden="true"] {
+  color: inherit !important;
+}
+
+[data-theme="dark"] .admin-text {
+  color: #b0b0b0 !important;
+}
+
+[data-theme="dark"] .client-details-section h6 {
+  color: #ffffff !important;
+  opacity: 0.9;
+}
+
+[data-theme="dark"] .client-details-section .detail-label {
+  color: #ffffff !important;
+  opacity: 0.8;
+}
+
+[data-theme="dark"] .client-details-section .detail-value {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .client-details-section .detail-value.empty {
+  color: #ffffff !important;
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .client-details-section .detail-item {
+  border-bottom: 1px solid #404040;
+}
+
+[data-theme="dark"] .add-client-modal .modal-close {
+  color: #b0b0b0;
+}
+
+[data-theme="dark"] .add-client-modal .modal-close:hover {
+  background-color: #404040;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .search-input::after {
+  color: #ffffff;
+  opacity: 0.8;
+}
+
+[data-theme="dark"] .filter-row .col-md-2 label {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .filter-row {
+  background-color: #6A1B1A;
+  border-color: #4A1413;
+}
+
+[data-theme="dark"] .search-input .form-control {
+  background-color: #3d3d3d;
+  border-color: #555;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .search-input .form-control:focus {
+  border-color: #6A1B1A !important;
+  background-color: #3d3d3d;
+  box-shadow: 0 0 0 0.2rem rgba(106, 27, 26, 0.25) !important;
+}
+
+[data-theme="dark"] .filter-row .col-md-2:nth-child(2) .form-select,
+[data-theme="dark"] .filter-row .col-md-2:nth-child(3) .form-select,
+[data-theme="dark"] .filter-row .col-md-2:nth-child(4) .form-select {
+  background-color: #3d3d3d;
+  border-color: #555;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .filter-row .col-md-2:nth-child(2) .form-select:focus,
+[data-theme="dark"] .filter-row .col-md-2:nth-child(3) .form-select:focus,
+[data-theme="dark"] .filter-row .col-md-2:nth-child(4) .form-select:focus {
+  border-color: #6A1B1A !important;
+  background-color: #3d3d3d;
+}
+
+[data-theme="dark"] .btn-modal {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-modal.btn-cancel {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-modal.btn-cancel:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+  box-shadow: 0 4px 12px rgba(106, 27, 26, 0.3);
+}
+
+[data-theme="dark"] .btn-modal.btn-success {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-modal.btn-success:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+}
+
+[data-theme="dark"] .btn-modal.btn-primary {
+  background: linear-gradient(135deg, #6A1B1A 0%, #4A1413 100%);
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-modal.btn-primary:hover {
+  background: linear-gradient(135deg, #4A1413 0%, #3A1010 100%);
+}
+
+/* Dark mode edit button - Green theme */
+[data-theme="dark"] #editClientSave {
+  background: linear-gradient(135deg, #28a745, #20c997) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] #editClientSave:hover {
+  background: linear-gradient(135deg, #218838, #1ea085) !important;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+[data-theme="dark"] .btn-modal.btn-danger {
+  background: #dc3545;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-modal.btn-danger:hover {
+  background: #c82333;
+}
+
+[data-theme="dark"] .btn-outline-secondary {
+  background: transparent;
+  border-color: #6c757d;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-outline-secondary:hover {
+  background: #6c757d;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .sidebar-menu .menu-item[data-section="add-client"] {
+  background: linear-gradient(135deg, #6A1B1A, #4A1413);
+  color: white !important;
+}
+
+[data-theme="dark"] .sidebar-menu .menu-item[data-section="add-client"]:hover {
+  background: linear-gradient(135deg, #4A1413, #3A1010);
+  color: white !important;
+}
+
+/* Filter Row Layout Improvements */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background-color: #6A1B1A;
+  border-radius: 0.5rem;
+  border: 1px solid #4A1413;
+  flex-wrap: nowrap;
+  box-shadow: 0 1px 3px rgba(106, 27, 26, 0.2);
+  overflow: hidden;
+  width: 98%;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.filter-row .col-md-2 {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.filter-row .col-md-2 label {
+  font-size: 0.8rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .filter-row .col-md-2 {
+    width: 100%;
+  }
+  
+  .filter-row .col-md-2:nth-child(2) .form-select,
+  .filter-row .col-md-2:nth-child(4) .form-select {
+    min-width: 100%;
+    max-width: 100%;
+  }
+  
+  .filter-row .col-md-2:nth-child(5) .btn,
+  .filter-row .col-md-2:nth-child(6) .btn {
+    min-width: 100%;
+    max-width: 100%;
+  }
+  
+  .search-input .form-control {
+    min-width: 100%;
+  }
+} 

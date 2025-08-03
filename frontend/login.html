@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Admin Login - Client Management Admin Dashboard</title>
+    <meta name="description" content="Secure admin login for Client Management Admin Dashboard">
     
     <!-- Favicon -->
     <link rel="icon" type="image/jpg" href="../assets/pics/favicon.jpg">
@@ -13,71 +14,78 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="./login.css">
+    <link rel="stylesheet" href="./login.css?v=1.5">
 </head>
-<body>
-    <div class="login-card">
+<body class="login-page">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#login-form" class="skip-link">Skip to login form</a>
+    
+    <main class="login-card" role="main">
         <!-- Login Header -->
-        <div class="login-header">
-            <i class="fas fa-user-shield mb-3" style="font-size: 3rem;"></i>
-            <h2>Admin Login</h2>
+        <header class="login-header">
+            <i class="fas fa-user-shield" aria-hidden="true"></i>
+            <h1>Admin Login</h1>
             <p>Enter your credentials to access the dashboard</p>
-        </div>
+        </header>
         
         <!-- Login Body -->
-        <div class="login-body">
-            <div id="error-message" class="alert alert-danger" role="alert" style="display: none;">
-                <i class="fas fa-exclamation-triangle me-2"></i>
+        <section class="login-body">
+            <div id="error-message" class="alert alert-danger" role="alert" style="display: none;" aria-live="polite">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                 <span id="error-text"></span>
             </div>
 
-            <form method="post" action="../backend/login.php">
+            <form method="post" action="../backend/login.php" id="login-form" novalidate>
                 <!-- Username Field -->
-                <div class="input-group mb-3">
-                    <span class="input-group-text">
-                        <i class="fas fa-user"></i>
+                <div class="input-group">
+                    <span class="input-group-text" aria-label="Username icon">
+                        <i class="fas fa-user" aria-hidden="true"></i>
                     </span>
                     <input type="text" 
                            class="form-control" 
                            name="username" 
+                           id="username"
                            placeholder="Username" 
                            required 
-                           autocomplete="username">
+                           autocomplete="username"
+                           aria-describedby="username-help">
                 </div>
                 
                 <!-- Password Field -->
-                <div class="input-group mb-4">
-                    <span class="input-group-text">
-                        <i class="fas fa-lock"></i>
+                <div class="input-group">
+                    <span class="input-group-text" aria-label="Password icon">
+                        <i class="fas fa-lock" aria-hidden="true"></i>
                     </span>
                     <input type="password" 
                            class="form-control" 
                            name="password" 
+                           id="password"
                            placeholder="Password" 
                            required 
-                           autocomplete="current-password">
+                           autocomplete="current-password"
+                           aria-describedby="password-help">
                 </div>
                 
                 <!-- Login Button -->
-                <button type="submit" class="btn btn-primary btn-login">
-                    <i class="fas fa-sign-in-alt me-2"></i>
-                    Sign In
+                <button type="submit" class="btn btn-primary btn-login" id="login-btn">
+                    <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                    <span>Sign In</span>
                 </button>
             </form>
             
             <!-- Footer -->
-            <div class="text-center mt-4">
-                <small class="text-muted">
-                    <i class="fas fa-shield-alt me-1"></i>
+            <footer class="login-footer">
+                <small>
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
                     Secure Admin Access
                 </small>
-            </div>
-        </div>
-    </div>
+            </footer>
+        </section>
+    </main>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JavaScript -->
-    <script src="./login.js"></script>
+    <script src="./login.js?v=1.3"></script>
 </body>
 </html> 

@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Global variables
   let filteredClients = [];
   let currentPage = 1;
-  let clientsPerPage = 10;
+  let clientsPerPage = 5;
   let sortColumn = '';
   let sortDirection = 'asc';
   let selectedClients = [];
@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
     uniqueLocations.sort();
     
     // Clear existing options except the first one
-    locationFilter.innerHTML = '<option value="">All Locations</option>';
+    locationFilter.innerHTML = '<option value="">Locations</option>';
     
     uniqueLocations.forEach(location => {
       const option = document.createElement('option');
@@ -357,6 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     currentPage = 1;
+    selectedClients = []; // Clear selected clients when filtering
     updateClientsCount();
     displayClients();
     updatePagination();
@@ -397,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>
-          <input type="checkbox" class="form-check-input client-checkbox" value="${client.id}" data-client-id="${client.id}">
+          <input type="checkbox" class="form-check-input client-checkbox" value="${client.id}" data-client-id="${client.id}" title="Select client">
         </td>
         <td>${client.display_id}</td>
         <td>${client.name || 'N/A'}</td>
@@ -423,6 +424,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (selectedClients.length > 0) {
       updateSelectedClients();
     }
+    
+    // Reset select all checkbox state
+    updateSelectAllCheckbox();
   }
 
   function initializeDashboard() {
@@ -764,7 +768,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const genderFilter = document.getElementById('filterGender');
         const locationFilter = document.getElementById('filterLocation');
         const categoryFilter = document.getElementById('filterCategory');
-        const selectAllCheckbox = document.getElementById('selectAll');
         
         if (searchInput) searchInput.value = '';
         if (genderFilter) genderFilter.value = '';
@@ -775,12 +778,6 @@ document.addEventListener('DOMContentLoaded', function() {
         currentPage = 1;
         selectedClients = [];
 
-        // Clear ALL selection checkboxes
-        if (selectAllCheckbox) {
-          selectAllCheckbox.checked = false;
-          selectAllCheckbox.indeterminate = false;
-        }
-        
         // Clear individual client checkboxes
         const clientCheckboxes = document.querySelectorAll('.client-checkbox');
         clientCheckboxes.forEach(checkbox => {
@@ -828,7 +825,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Client Management Variables (filteredClients already declared globally)
   currentPage = 1;
-  clientsPerPage = 10;
+  clientsPerPage = 5;
   sortColumn = '';             // No column selected initially
   sortDirection = 'asc';       // Default direction for when user clicks
 
@@ -847,7 +844,7 @@ document.addEventListener('DOMContentLoaded', function() {
     uniqueLocations.sort();
     
     // Clear existing options except the first one
-    locationFilter.innerHTML = '<option value="">All Locations</option>';
+    locationFilter.innerHTML = '<option value="">Locations</option>';
     
     uniqueLocations.forEach(location => {
       const option = document.createElement('option');
@@ -901,6 +898,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Reset to first page and redisplay
     currentPage = 1;
+    selectedClients = []; // Clear selected clients when sorting
     displayClients();
     updatePagination();
   }
@@ -984,25 +982,51 @@ document.addEventListener('DOMContentLoaded', function() {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
       currentPage = page;
       
-      // Smooth scroll to All Clients section header
-      const allClientsSection = document.getElementById('all-clients-section');
-      if (allClientsSection) {
-        allClientsSection.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
-        });
+      // Add comprehensive loading effect
+      const tableBody = document.getElementById('allClientsTableBody');
+      const table = tableBody.closest('table');
+      
+      // Add loading class to table body
+      tableBody.classList.add('loading');
+      
+      // Create loading overlay if it doesn't exist
+      let loadingOverlay = table.querySelector('.table-loading-overlay');
+      if (!loadingOverlay) {
+        loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'table-loading-overlay';
+        loadingOverlay.innerHTML = `
+          <div class="loading-spinner">
+            <div class="loading-icon">
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+          </div>
+        `;
+        table.style.position = 'relative';
+        table.appendChild(loadingOverlay);
       }
       
-      // Add loading effect
-      const tableBody = document.getElementById('allClientsTableBody');
-      tableBody.style.opacity = '0.5';
+
       
-      // Small delay for visual feedback
+      // Show loading overlay with fade-in effect
+      loadingOverlay.style.display = 'flex';
+      loadingOverlay.style.opacity = '0';
       setTimeout(() => {
+        loadingOverlay.style.opacity = '1';
+      }, 10);
+      
+      // Simulate loading time for better UX - increased duration
+      setTimeout(() => {
+        selectedClients = []; // Clear selected clients when changing page
         displayClients();
         updatePagination();
-        tableBody.style.opacity = '1';
-      }, 100);
+        
+        // Hide loading overlay with fade-out effect
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+          tableBody.classList.remove('loading');
+        }, 200);
+      }, 800); // Increased from 300ms to 800ms for better visibility
     }
   }
 
@@ -1023,38 +1047,89 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set modal title
     modalTitle.textContent = `${client.name} - Client Details`;
 
-    // Create client details HTML
-    const details = [
+    // Create client details HTML with sections
+    const personalInfo = [
       { icon: 'fas fa-id-card', label: 'Client ID', value: client.id },
       { icon: 'fas fa-user', label: 'Full Name', value: client.name },
       { icon: 'fas fa-birthday-cake', label: 'Age', value: client.age },
       { icon: 'fas fa-calendar-alt', label: 'Date of Birth', value: client.dob ? new Date(client.dob).toLocaleDateString() : null },
-      { icon: 'fas fa-venus-mars', label: 'Gender', value: client.gender },
+      { icon: 'fas fa-venus-mars', label: 'Gender', value: client.gender }
+    ];
+
+    const locationInfo = [
       { icon: 'fas fa-map-marker-alt', label: 'Location', value: client.location },
       { icon: 'fas fa-passport', label: 'Visa Type', value: client.type },
-      { icon: 'fas fa-phone', label: 'Phone Number', value: client.phone },
+      { icon: 'fas fa-phone', label: 'Phone Number', value: client.phone }
+    ];
+
+    const travelInfo = [
       { icon: 'fas fa-plane-departure', label: 'Myanmar Departure Date', value: client.arrival_date ? new Date(client.arrival_date).toLocaleDateString() : null },
       { icon: 'fas fa-plane-arrival', label: 'US Arrival Date', value: client.us_arrival_date ? new Date(client.us_arrival_date).toLocaleDateString() : null },
-      { icon: 'fas fa-calendar-times', label: 'Visa Expiry', value: client.visa_expiry_date ? new Date(client.visa_expiry_date).toLocaleDateString() : null },
+      { icon: 'fas fa-calendar-times', label: 'Visa Expiry', value: client.visa_expiry_date ? new Date(client.visa_expiry_date).toLocaleDateString() : null }
+    ];
+
+    const additionalInfo = [
       { icon: 'fas fa-sticky-note', label: 'Notes', value: client.note }
     ];
 
-    // Generate HTML for client details
-    modalBody.innerHTML = details.map(detail => {
-      const value = detail.value || 'Not provided';
-      const isEmpty = !detail.value;
-      return `
-        <div class="client-detail">
-          <div class="detail-icon">
-            <i class="${detail.icon}"></i>
-          </div>
-          <div class="detail-content">
-            <div class="detail-label">${detail.label}</div>
-            <div class="detail-value ${isEmpty ? 'empty' : ''}">${value}</div>
-          </div>
-        </div>
-      `;
-    }).join('');
+    // Generate HTML for client details with sections
+    modalBody.innerHTML = `
+      <div class="client-details-section">
+        <h6><i class="fas fa-user me-2"></i>Personal Information</h6>
+        ${personalInfo.map(detail => {
+          const value = detail.value || 'Not provided';
+          const isEmpty = !detail.value;
+          return `
+            <div class="detail-item">
+              <span class="detail-label">${detail.label}</span>
+              <span class="detail-value ${isEmpty ? 'empty' : ''}">${value}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="client-details-section">
+        <h6><i class="fas fa-map-marker-alt me-2"></i>Location & Contact</h6>
+        ${locationInfo.map(detail => {
+          const value = detail.value || 'Not provided';
+          const isEmpty = !detail.value;
+          return `
+            <div class="detail-item">
+              <span class="detail-label">${detail.label}</span>
+              <span class="detail-value ${isEmpty ? 'empty' : ''}">${value}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="client-details-section">
+        <h6><i class="fas fa-plane me-2"></i>Travel Information</h6>
+        ${travelInfo.map(detail => {
+          const value = detail.value || 'Not provided';
+          const isEmpty = !detail.value;
+          return `
+            <div class="detail-item">
+              <span class="detail-label">${detail.label}</span>
+              <span class="detail-value ${isEmpty ? 'empty' : ''}">${value}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="client-details-section">
+        <h6><i class="fas fa-info-circle me-2"></i>Additional Information</h6>
+        ${additionalInfo.map(detail => {
+          const value = detail.value || 'Not provided';
+          const isEmpty = !detail.value;
+          return `
+            <div class="detail-item">
+              <span class="detail-label">${detail.label}</span>
+              <span class="detail-value ${isEmpty ? 'empty' : ''}">${value}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
 
     // Show modal
     modal.classList.add('active');
@@ -1329,9 +1404,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Update the row content
       row.innerHTML = `
-        <td>
-          <input type="checkbox" class="form-check-input client-checkbox" value="${updatedClient.id}" data-client-id="${updatedClient.id}">
-        </td>
         <td>${displayId}</td>
         <td>${updatedClient.name || 'N/A'}</td>
         <td>${updatedClient.age || 'N/A'}</td>
@@ -1341,6 +1413,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <td>${updatedClient.phone || 'N/A'}</td>
         <td>${updatedClient.arrival_date ? new Date(updatedClient.arrival_date).toLocaleDateString() : 'N/A'}</td>
         <td>
+          <input type="checkbox" class="form-check-input client-checkbox me-2" value="${updatedClient.id}" data-client-id="${updatedClient.id}" title="Select client">
           <button class="btn btn-sm btn-outline-primary me-1" onclick="viewClient(${updatedClient.id})" title="View Details">
             <i class="fas fa-eye"></i>
           </button>
@@ -1369,6 +1442,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('clientsPerPage').addEventListener('change', function() {
     clientsPerPage = this.value; // Keep as string to handle 'all' option
     currentPage = 1;
+    selectedClients = []; // Clear selected clients when changing page size
     displayClients();
     updatePagination();
   });
@@ -1896,22 +1970,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Selection handling functions  
   function setupSelectionHandlers() {
-    const selectAllCheckbox = document.getElementById('selectAll');
     const dynamicActionBtn = document.getElementById('dynamicActionBtn');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
 
     // Handle select all checkbox
-    selectAllCheckbox.addEventListener('change', function() {
-      const clientCheckboxes = document.querySelectorAll('.client-checkbox');
-      clientCheckboxes.forEach(checkbox => {
-        checkbox.checked = this.checked;
+    if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('change', function(e) {
+        const clientCheckboxes = document.querySelectorAll('.client-checkbox');
+        const isChecked = e.target.checked;
+        
+        clientCheckboxes.forEach(checkbox => {
+          checkbox.checked = isChecked;
+        });
+        
+        updateSelectedClients();
       });
-      updateSelectedClients();
-    });
+    }
 
     // Handle individual client selection change
     document.addEventListener('change', function(e) {
       if (e.target.classList.contains('client-checkbox')) {
         updateSelectedClients();
+        updateSelectAllCheckbox();
       }
     });
 
@@ -1928,39 +2008,68 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize add client modal handlers
   initializeAddClientModal();
   
+  // Initialize sidebar add client button
+  const sidebarAddClientBtn = document.getElementById('sidebarAddClient');
+  if (sidebarAddClientBtn) {
+    sidebarAddClientBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      openAddClientModal();
+    });
+  }
+  
   // Initialize hamburger button functionality
   initializeHamburgerButton();
+  
+  // Initialize button state
+  updateSelectedClients();
 }
 
   function updateSelectedClients() {
     const clientCheckboxes = document.querySelectorAll('.client-checkbox:checked');
-    const selectAllCheckbox = document.getElementById('selectAll');
     const dynamicActionBtn = document.getElementById('dynamicActionBtn');
     
     selectedClients = Array.from(clientCheckboxes).map(cb => cb.getAttribute('data-client-id'));
     
-    // Update select all checkbox state
-    const totalCheckboxes = document.querySelectorAll('.client-checkbox').length;
-    if (selectedClients.length === 0) {
-      selectAllCheckbox.checked = false;
-      selectAllCheckbox.indeterminate = false;
-    } else if (selectedClients.length === totalCheckboxes) {
-      selectAllCheckbox.checked = true;
-      selectAllCheckbox.indeterminate = false;
-    } else {
-      selectAllCheckbox.checked = false;
-      selectAllCheckbox.indeterminate = true;
-    }
+    console.log('Selected clients:', selectedClients.length, selectedClients);
+    console.log('Dynamic action button found:', !!dynamicActionBtn);
 
     // Update dynamic button based on selection state
-    if (selectedClients.length > 0) {
-      // Change to delete mode
-      dynamicActionBtn.className = 'btn btn-danger w-100';
-      dynamicActionBtn.innerHTML = `<i class="fas fa-trash-alt me-1"></i>Delete Selected (${selectedClients.length})`;
+    if (dynamicActionBtn) {
+      if (selectedClients.length > 0) {
+        // Change to delete mode
+        dynamicActionBtn.className = 'btn btn-danger w-100';
+        dynamicActionBtn.innerHTML = `<i class="fas fa-trash-alt me-1"></i>Delete`;
+        console.log('Button changed to DELETE mode');
+      } else {
+        // Change to add mode
+        dynamicActionBtn.className = 'btn btn-success w-100';
+        dynamicActionBtn.innerHTML = '<i class="fas fa-user-plus me-1"></i>Add Client';
+        console.log('Button changed to ADD mode');
+      }
     } else {
-      // Change to add mode
-      dynamicActionBtn.className = 'btn btn-success w-100';
-      dynamicActionBtn.innerHTML = '<i class="fas fa-user-plus me-1"></i>Add Client';
+      console.error('Dynamic action button not found!');
+    }
+  }
+
+  function updateSelectAllCheckbox() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const clientCheckboxes = document.querySelectorAll('.client-checkbox');
+    const checkedCheckboxes = document.querySelectorAll('.client-checkbox:checked');
+    
+    if (selectAllCheckbox && clientCheckboxes.length > 0) {
+      if (checkedCheckboxes.length === 0) {
+        // No checkboxes checked
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+      } else if (checkedCheckboxes.length === clientCheckboxes.length) {
+        // All checkboxes checked
+        selectAllCheckbox.checked = true;
+        selectAllCheckbox.indeterminate = false;
+      } else {
+        // Some checkboxes checked
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = true;
+      }
     }
   }
 
@@ -2398,11 +2507,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Immediately clear selections and update UI
         selectedClients = [];
-        const selectAllCheckbox = document.getElementById('selectAll');
-        if (selectAllCheckbox) {
-          selectAllCheckbox.checked = false;
-          selectAllCheckbox.indeterminate = false;
-        }
         
         // Clear individual client checkboxes
         const clientCheckboxes = document.querySelectorAll('.client-checkbox');

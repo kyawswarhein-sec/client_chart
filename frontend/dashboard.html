@@ -12,9 +12,16 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="./dashboard.css">
+  <link rel="stylesheet" href="./dashboard.css?v=2.8">
+  <!-- UX Improvements -->
+  <link rel="stylesheet" href="./ux-improvements.css">
+  <!-- UI Improvements -->
+  <link rel="stylesheet" href="./ui-improvements.css">
 </head>
-<body>
+<body class="keyboard-nav">
+
+  <!-- Skip to main content link for accessibility -->
+  <a href="#mainContent" class="skip-link">Skip to main content</a>
 
   <!-- Header -->
   <header class="header">
@@ -23,7 +30,7 @@
         <!-- Left side - Logo and Hamburger -->
         <div class="logo-section">
           <!-- Hamburger Button for Mobile -->
-          <button class="hamburger-btn" id="hamburgerBtn" data-lte-toggle="sidebar" title="Toggle Sidebar">
+          <button class="hamburger-btn" id="hamburgerBtn" title="Toggle Sidebar" aria-label="Toggle navigation menu">
             <i class="fas fa-bars"></i>
           </button>
           <div class="logo">
@@ -36,35 +43,36 @@
           <span class="admin-text">Admin</span>
           <div class="user-menu">
             <!-- Theme Toggle Button -->
-            <button class="user-btn" id="themeToggle" title="Toggle Dark/Light Mode">
+            <button class="user-btn" id="themeToggle" title="Toggle Dark/Light Mode" aria-label="Toggle dark mode">
               <i class="fas fa-moon" id="themeIcon"></i>
             </button>
             
             <!-- Notification Button -->
             <div class="notification-container">
-              <button class="user-btn" id="notificationBtn" title="Notifications">
+              <button class="user-btn" id="notificationBtn" title="Notifications" aria-label="View notifications">
                 <i class="fas fa-bell"></i>
-                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                <span class="notification-badge" id="notificationBadge" style="display: none;" aria-label="0 unread notifications">0</span>
               </button>
               
               <!-- Notification Dropdown -->
               <div class="notification-dropdown" id="notificationDropdown">
                 <div class="notification-header">
                   <h6 class="notification-title">Notifications</h6>
-                  <button class="mark-all-read-btn" id="markAllReadBtn" title="Mark all as read">
+                  <button class="mark-all-read-btn" id="markAllReadBtn" title="Mark all as read" aria-label="Mark all notifications as read">
                     <i class="fas fa-check-double"></i>
                   </button>
                 </div>
                 <div class="notification-list" id="notificationList">
-                  <div class="no-notifications">
-                    <i class="fas fa-bell-slash"></i>
-                    <p>No notifications</p>
-                  </div>
+                                  <div class="no-notifications empty-state">
+                  <i class="fas fa-bell-slash"></i>
+                  <h3>No notifications</h3>
+                  <p>You're all caught up!</p>
+                </div>
                 </div>
               </div>
             </div>
             
-            <button class="user-btn" id="profileBtn" title="Profile">
+            <button class="user-btn" id="profileBtn" title="Profile" aria-label="Open profile menu">
               <i class="fas fa-user"></i>
             </button>
             
@@ -109,26 +117,26 @@
       <h3 class="sidebar-title">Navigation</h3>
     </div>
     <nav class="sidebar-menu">
-      <a href="#" class="menu-item active" data-section="dashboard">
+      <a href="#" class="menu-item active" data-section="dashboard" aria-label="Go to dashboard">
         <i class="fas fa-tachometer-alt"></i>
         Dashboard
       </a>
-      <a href="#" class="menu-item" data-section="analytics">
+      <a href="#" class="menu-item" data-section="analytics" aria-label="Go to analytics">
         <i class="fas fa-chart-pie"></i>
         Analytics
       </a>
-      <a href="#" class="menu-item" data-section="recent-clients">
+      <a href="#" class="menu-item" data-section="recent-clients" aria-label="Go to recent clients">
         <i class="fas fa-clock"></i>
         Recent Client
       </a>
-      <a href="#" class="menu-item" data-section="all-clients">
+      <a href="#" class="menu-item" data-section="all-clients" aria-label="Go to all clients">
         <i class="fas fa-users"></i>
         All Clients
       </a>
       <div class="menu-divider"></div>
-      <a href="../backend/logout.php" class="menu-item">
-        <i class="fas fa-sign-out-alt"></i>
-        Logout
+      <a href="#" class="menu-item" data-section="add-client" id="sidebarAddClient" aria-label="Add new client">
+        <i class="fas fa-user-plus"></i>
+        Add Client
       </a>
     </nav>
   </aside>
@@ -328,6 +336,7 @@
                 <div class="d-flex align-items-center gap-3">
                   <span class="text-muted">Show:</span>
                   <select id="clientsPerPage" class="form-select form-select-sm" style="width: auto;">
+                    <option value="5" selected>5 clients</option>
                     <option value="10">10 clients</option>
                     <option value="30">30 clients</option>
                     <option value="50">50 clients</option>
@@ -340,12 +349,14 @@
               <div class="card-body">
                 <!-- Search and Filter -->
                 <div class="row mb-3 filter-row">
-                  <div class="col-md-2">
-                    <input type="text" id="searchClients" class="form-control" placeholder="Search clients...">
+                                  <div class="col-md-2">
+                  <div class="search-input">
+                    <input type="text" id="searchClients" class="form-control" placeholder="Search clients..." aria-label="Search clients">
                   </div>
+                </div>
                   <div class="col-md-2">
                     <select id="filterGender" class="form-select">
-                      <option value="">All Genders</option>
+                      <option value="">Genders</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                       <option value="Other">Other</option>
@@ -353,13 +364,13 @@
                   </div>
                   <div class="col-md-2">
                     <select id="filterLocation" class="form-select">
-                      <option value="">All Locations</option>
+                      <option value="">Locations</option>
                       <!-- Locations will be populated dynamically -->
                     </select>
                   </div>
                   <div class="col-md-2">
                     <select id="filterCategory" class="form-select">
-                      <option value="">All Visa Types</option>
+                      <option value="">Visa Types</option>
                       <option value="H1B">H1B</option>
                       <option value="F1">F1</option>
                       <option value="L1">L1</option>
@@ -368,10 +379,10 @@
                     </select>
                   </div>
                   <div class="col-md-2">
-                    <button id="resetFilters" class="btn btn-outline-secondary w-100">Reset</button>
+                    <button id="resetFilters" class="btn btn-outline-secondary w-100" aria-label="Reset all filters">Reset</button>
                   </div>
                   <div class="col-md-2">
-                    <button id="dynamicActionBtn" class="btn btn-success w-100">
+                    <button id="dynamicActionBtn" class="btn btn-success w-100" aria-label="Add new client">
                       <i class="fas fa-user-plus me-1"></i>Add Client
                     </button>
                   </div>
@@ -383,27 +394,27 @@
                     <thead class="table-dark">
                       <tr>
                         <th width="50">
-                          <input type="checkbox" id="selectAll" class="form-check-input">
+                          <input type="checkbox" id="selectAllCheckbox" class="form-check-input" title="Select all clients">
                         </th>
-                        <th class="sortable" data-column="frontend_id">
+                        <th class="sortable" data-column="frontend_id" width="60">
                           ID <i class="fas fa-sort sort-icon"></i>
                         </th>
-                        <th class="sortable" data-column="name">
+                        <th class="sortable" data-column="name" width="150">
                           NAME <i class="fas fa-sort sort-icon"></i>
                         </th>
-                        <th class="sortable" data-column="age">
+                        <th class="sortable" data-column="age" width="60">
                           AGE <i class="fas fa-sort sort-icon"></i>
                         </th>
-                        <th>GENDER</th>
-                        <th>LOCATION</th>
-                        <th>
+                        <th width="80">GENDER</th>
+                        <th width="120">LOCATION</th>
+                        <th width="100">
                           VISA TYPE
                         </th>
-                        <th>PHONE</th>
-                        <th class="sortable" data-column="arrival_date">
+                        <th width="100">PHONE</th>
+                        <th class="sortable" data-column="arrival_date" width="120">
                           ARRIVAL DATE <i class="fas fa-sort sort-icon"></i>
                         </th>
-                        <th width="120">ACTIONS</th>
+                        <th width="100">ACTIONS</th>
                       </tr>
                     </thead>
                     <tbody id="allClientsTableBody">
@@ -749,51 +760,89 @@
   </div>
 
   <!-- Admin Profile Settings Modal -->
-  <div class="modal-overlay" id="profileSettingsModal">
+  <div class="modal-overlay" id="profileSettingsModal" role="dialog" aria-labelledby="profileSettingsTitle" aria-describedby="profileSettingsDescription">
     <div class="modal-content profile-settings-modal">
       <div class="modal-header profile-settings-header">
-        <div class="profile-settings-icon">
+        <div class="profile-settings-icon" aria-hidden="true">
           <i class="fas fa-user-cog"></i>
         </div>
-        <h5 class="modal-title">Profile Settings</h5>
-        <button class="modal-close" id="profileSettingsModalClose">
-          <i class="fas fa-times"></i>
+        <h5 class="modal-title" id="profileSettingsTitle">Profile Settings</h5>
+        <button class="modal-close" id="profileSettingsModalClose" aria-label="Close profile settings">
+          <i class="fas fa-times" aria-hidden="true"></i>
         </button>
       </div>
       <div class="modal-body profile-settings-body">
-        <form id="profileSettingsForm" class="profile-settings-form">
+        <div id="profileSettingsDescription" class="sr-only">
+          Form to update your profile information including name and password
+        </div>
+        <form id="profileSettingsForm" class="profile-settings-form" novalidate>
           
           <!-- Change Name Section -->
           <div class="settings-section">
             <h6 class="section-title">
-              <i class="fas fa-user me-2"></i>Admin Name
+              <i class="fas fa-user" aria-hidden="true"></i>Admin Name
             </h6>
             <div class="form-group">
               <label for="adminName">Full Name</label>
-              <input type="text" id="adminName" name="name" class="form-control" placeholder="Enter your full name" required>
+              <input type="text" 
+                     id="adminName" 
+                     name="name" 
+                     class="form-control" 
+                     placeholder="Enter your full name" 
+                     required 
+                     autocomplete="name"
+                     aria-describedby="adminNameHelp">
+              <div id="adminNameHelp" class="sr-only">Enter your full name as it should appear in the system</div>
             </div>
           </div>
           
           <!-- Change Password Section -->
           <div class="settings-section">
             <h6 class="section-title">
-              <i class="fas fa-key me-2"></i>Change Password
+              <i class="fas fa-key" aria-hidden="true"></i>Change Password
             </h6>
             <div class="form-group">
               <label for="currentPassword">Current Password</label>
-              <input type="password" id="currentPassword" name="current_password" class="form-control" placeholder="Enter current password" required>
+              <input type="password" 
+                     id="currentPassword" 
+                     name="current_password" 
+                     class="form-control" 
+                     placeholder="Enter current password" 
+                     required 
+                     autocomplete="current-password"
+                     aria-describedby="currentPasswordHelp">
+              <div id="currentPasswordHelp" class="sr-only">Enter your current password to verify your identity</div>
             </div>
             <div class="form-group">
               <label for="newPassword">New Password</label>
-              <input type="password" id="newPassword" name="new_password" class="form-control" placeholder="Enter new password" required>
+              <input type="password" 
+                     id="newPassword" 
+                     name="new_password" 
+                     class="form-control" 
+                     placeholder="Enter new password" 
+                     required 
+                     autocomplete="new-password"
+                     aria-describedby="newPasswordHelp passwordStrength">
+              <div id="newPasswordHelp" class="sr-only">Enter a new password that is at least 6 characters long</div>
+              <div class="password-strength" id="passwordStrength" aria-live="polite">
+                <div class="password-strength-bar"></div>
+              </div>
             </div>
             <div class="form-group">
               <label for="confirmPassword">Confirm New Password</label>
-              <input type="password" id="confirmPassword" name="confirm_password" class="form-control" placeholder="Confirm new password" required>
+              <input type="password" 
+                     id="confirmPassword" 
+                     name="confirm_password" 
+                     class="form-control" 
+                     placeholder="Confirm new password" 
+                     required 
+                     autocomplete="new-password"
+                     aria-describedby="confirmPasswordHelp">
+              <div id="confirmPasswordHelp" class="sr-only">Re-enter your new password to confirm it</div>
             </div>
-            <div class="password-requirements">
-              <small class="text-muted">
-                <i class="fas fa-info-circle me-1"></i>
+            <div class="password-requirements" role="note" aria-label="Password requirements">
+              <small>
+                <i class="fas fa-info-circle" aria-hidden="true"></i>
                 Password must be at least 6 characters long
               </small>
             </div>
@@ -803,10 +852,10 @@
       </div>
       <div class="modal-footer profile-settings-footer">
         <button type="button" class="btn-modal btn-cancel" id="profileSettingsCancel">
-          <i class="fas fa-times me-2"></i>Cancel
+          <i class="fas fa-times" aria-hidden="true"></i>Cancel
         </button>
         <button type="button" class="btn-modal btn-primary" id="profileSettingsSave">
-          <i class="fas fa-save me-2"></i>Save Changes
+          <i class="fas fa-save" aria-hidden="true"></i>Save Changes
         </button>
       </div>
     </div>
@@ -843,9 +892,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- AdminLTE JS for Sidebar Toggle -->
-  <script src="../assets/adminlte/dist/js/adminlte.js"></script>
   <!-- Custom JavaScript -->
-  <script src="./dashboard.js"></script>
+  <script src="./dashboard.js?v=2.2"></script>
 </body>
 </html> 
